@@ -1,0 +1,20 @@
+string[] words = { "the", "quick", "brown", "all", "fox", "all", "quick", "fox" };
+string word1 = "quick";
+string word2 = "fox";
+List<int> index1 = new List<int>(), index2 = new List<int>();
+for (int i = 0; i < words.Length; i++) {
+	if (word1 == words[i]) {
+		index1.Add(i);
+	}
+	if (word2 == words[i]) {
+		index2.Add(i);
+	}
+}
+int difference = int.MaxValue;
+index1.ForEach(one => {
+	index2.ForEach(two => {
+		int current = Math.Abs(one-two);
+		if (current < difference) difference = current; 
+	});
+});
+Console.WriteLine(difference);
