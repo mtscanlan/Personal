@@ -35,9 +35,9 @@ int main()
 {
 	float x = 2;
 	int y = 10;
-	printf("%f", power(x, y));
+	printf("%f", power(x, y)); // 1024
 	printf("\n");
-	printf("%f", powerTwo(x, y));
+	printf("%f", powerTwo(x, y)); // 1024
 	getchar();
 	return 0;
 }
