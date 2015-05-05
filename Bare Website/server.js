@@ -10,9 +10,7 @@ var Start = function(route, serve, reqtype) {
         // Extracts the pathname from the url
         var pathname = url.parse(request.url).pathname;
 
-        // Removes the starting "/". If this fails, then that means the request
-        // was without
-        // the "/", and so does not affect it.
+        // Removes the starting "/". If this fails, then that means the request was without the "/", and so does not affect it.
         try {
             pathname = pathname.substring(1, pathname.length);
         } catch (err) {}
@@ -39,7 +37,7 @@ var Start = function(route, serve, reqtype) {
 				path = route("404.html");
 				html = serve(path);;
 				type = "html";
-				console.log("Reading file was unsuccesful.");
+				console.log("Reading file was unsuccessful.");
 			}
 
             // Writes what type of data will be sent. Dynamically sets file ending.
@@ -47,7 +45,6 @@ var Start = function(route, serve, reqtype) {
                 "Content-Type" : "text/" + type
             });
             response.write(html);
-            // ends connection
             response.end();
             console.log("Request answered successfully");
         }

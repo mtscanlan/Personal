@@ -12,13 +12,12 @@ var serve = function(path) {
 var reqtype = function(path) {
 
     var type = "";
-
     var pathSplit = path.split(".");
+	
+	// If for some reason no ending, output as plain text file
     if (pathSplit === 1) {
-        // If for some reason no ending, output as plain text file
         type = "plain";
     } else {
-
         type = pathSplit[1]; // Returns thee part after the "." seperator
     }
 
