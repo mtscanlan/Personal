@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 
 namespace MergeSort {
 
-	class MergeFile :  {
+    class MergeFile : IEnumerator<string>
+    {
 		private readonly StreamReader _reader;
 
 		public MergeFile(string file) {
@@ -45,7 +46,7 @@ namespace MergeSort {
 				.Cast<StreamReader>().ToList();
 
 			IEnumerator<string> next = null;
-			using (System.IO.StreamWriter file = new System.IO.StreamWriter("M:/Google Drive/Interview Test Questions/Scrap/MergeSort/FilesToMerge/WriteLines.txt")) {
+			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"WriteLines.txt")) {
 				while (true) {
 					bool done = true;
 					// loop over the helpers

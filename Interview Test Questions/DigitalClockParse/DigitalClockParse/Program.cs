@@ -9,19 +9,19 @@ namespace DigitalClockParse {
 	class Program {
 		static void Main(string[] args) {
 			List<string> numbers = new List<string>() {
-				" _ | ||_|",
-				"",
-				"",
-				"",
-				"",
-				"",
-				" _ |_ |_|",
-				"",
-				" _ |_||_|",
-				""
+				" _ | ||_|", // 0
+				"", // 1
+				"", // 2
+				"", // 3
+				"", // 4
+				"", // 5
+				" _ |_ |_|", // 6
+				"", // 7
+				" _ |_||_|", // 8
+				"" // 9
 			};
 
-			string filePath = "M:/Google Drive/Interview Test Questions/Scrap/DigitalClockParse/time.txt";
+			string filePath = @"time.txt";
 			string[] lines = File.ReadAllLines(filePath);
 			if (lines.Length == 3) {
 				int lineLength = lines[0].Length;
@@ -36,6 +36,7 @@ namespace DigitalClockParse {
 					Console.Write(numbers.IndexOf(number));
 				}
 				Console.WriteLine();
+                Console.ReadKey();
 			}
 		}
 	}
