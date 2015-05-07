@@ -29,25 +29,25 @@ namespace Binary_Float
 		{
 			string[] parts = s.Split('.');
 			double total = 0;
+			char[] integerPart = parts[0].ToCharArray(), fractionPart = parts[1].ToCharArray();
+
 			int integerPartLength = parts[0].Length;
-			char[] a = parts[0].ToCharArray();
-			char[] b = parts[1].ToCharArray();
-			int multiple = power(2, integerPartLength - 1);
+			int multiple = power(2, integerPartLength);
 			for (int i = 0; i < integerPartLength; i++)
 			{
-				int x = a[i] - 48;
-				total += (int)(x * multiple);
 				multiple = multiple >> 1;
+                int x = integerPart[i] - 48;
+				total += x * multiple;
 			}
+
 			int fractionPartLength = parts[1].Length;
-			multiple = 2;
 			for (int i = 0; i < fractionPartLength; i++)
 			{
-				int x = b[i] - 48;
+                int x = fractionPart[i] - 48;
 				total += x / multiple;
 				multiple = multiple << 1;
 			}
-            Console.WriteLine("{0}", total);
+			Console.WriteLine("{0}", total);
 		}
 
 		public static void print_float2(string s) // Top solution
@@ -57,7 +57,7 @@ namespace Binary_Float
 			int fp = Convert.ToInt32(parts[1], 2) << 1;
 
 			double total = (double)ip + ((double)fp / (2 << parts[1].Length));
-            Console.WriteLine("{0}", total);
+			Console.WriteLine("{0}", total);
 		}
 
 
@@ -72,7 +72,7 @@ namespace Binary_Float
             //}
             //s.Stop();
             //Console.WriteLine(s.ElapsedTicks);
-            //s = new Stopwatch();
+            //s.Reset();
             //s.Start();
             //for (int i = 0; i < iterations; i++)
             //{
