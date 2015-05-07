@@ -20,7 +20,7 @@ namespace Binary_Float
 			char[] integerPart = parts[0].ToCharArray(), fractionPart = parts[1].ToCharArray();
 
 			int integerPartLength = parts[0].Length;
-			int multiple = 2 << integerPartLength;
+            int multiple = 2 << integerPartLength - 1;
 			for (int i = 0; i < integerPartLength; i++)
 			{
 				multiple = multiple >> 1;
@@ -30,12 +30,12 @@ namespace Binary_Float
 
 			int fractionPartLength = parts[1].Length;
 			for (int i = 0; i < fractionPartLength; i++)
-			{
+            {
+                multiple = multiple << 1;
                 int x = fractionPart[i] - 48;
-				total += x / multiple;
-				multiple = multiple << 1;
+				total += (double)x / multiple;
 			}
-			//Console.WriteLine("{0}", total);
+            Console.WriteLine("{0}", total);
 		}
 
 		public static void print_float2(string s) // Top solution
@@ -45,31 +45,31 @@ namespace Binary_Float
 			int fp = Convert.ToInt32(parts[1], 2) << 1;
 
 			double total = (double)ip + ((double)fp / (2 << parts[1].Length));
-			//Console.WriteLine("{0}", total);
+			Console.WriteLine("{0}", total);
 		}
 
 
 		static void Main(string[] args)
 		{
-            int iterations = 10000000;
-            Stopwatch s = new Stopwatch();
-            s.Start();
-            for (int i = 0; i < iterations; i++)
-            {
-                print_float("100.0011"); // 4.1875
-            }
-            s.Stop();
-            Console.WriteLine(s.ElapsedTicks);
-            s.Reset();
-            s.Start();
-            for (int i = 0; i < iterations; i++)
-            {
-                print_float2("100.0011"); // 4.1875
-            }
-            s.Stop();
-            Console.WriteLine(s.ElapsedTicks);
-            //print_float("100.0011"); // 4.1875
-            //print_float2("100.0011"); // 4.1875
+            //int iterations = 10000000;
+            //Stopwatch s = new Stopwatch();
+            //s.Start();
+            //for (int i = 0; i < iterations; i++)
+            //{
+            //    print_float("100.0011"); // 4.1875
+            //}
+            //s.Stop();
+            //Console.WriteLine(s.ElapsedTicks);
+            //s.Reset();
+            //s.Start();
+            //for (int i = 0; i < iterations; i++)
+            //{
+            //    print_float2("100.0011"); // 4.1875
+            //}
+            //s.Stop();
+            //Console.WriteLine(s.ElapsedTicks);
+            print_float("100.0011"); // 4.1875
+            print_float2("100.0011"); // 4.1875
 			Console.ReadKey();
 		}
 	}
