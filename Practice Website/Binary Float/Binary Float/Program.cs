@@ -13,26 +13,14 @@ namespace Binary_Float
 			4.1875
 		*/
 
-		public static int power(int a, int b) {
-			int result = 1;
-			while (b != 0) {
-				if (b % 2 == 1) {
-					result *= a;
-				}
-				b /= 2;
-				a *= a;
-			}
-			return result;
-		}
-
-		public static void print_float(string s) // My way, slightly faster. Less terse obviously.
+		public static void print_float(string s) // My way, faster. Less terse obviously.
 		{
 			string[] parts = s.Split('.');
 			double total = 0;
 			char[] integerPart = parts[0].ToCharArray(), fractionPart = parts[1].ToCharArray();
 
 			int integerPartLength = parts[0].Length;
-			int multiple = power(2, integerPartLength);
+			int multiple = 2 << integerPartLength;
 			for (int i = 0; i < integerPartLength; i++)
 			{
 				multiple = multiple >> 1;
@@ -47,7 +35,7 @@ namespace Binary_Float
 				total += x / multiple;
 				multiple = multiple << 1;
 			}
-			Console.WriteLine("{0}", total);
+			//Console.WriteLine("{0}", total);
 		}
 
 		public static void print_float2(string s) // Top solution
@@ -57,31 +45,31 @@ namespace Binary_Float
 			int fp = Convert.ToInt32(parts[1], 2) << 1;
 
 			double total = (double)ip + ((double)fp / (2 << parts[1].Length));
-			Console.WriteLine("{0}", total);
+			//Console.WriteLine("{0}", total);
 		}
 
 
 		static void Main(string[] args)
 		{
-            //int iterations = 10000000;
-            //Stopwatch s = new Stopwatch();
-            //s.Start();
-            //for (int i = 0; i < iterations; i++)
-            //{
-            //    print_float("100.0011"); // 4.1875
-            //}
-            //s.Stop();
-            //Console.WriteLine(s.ElapsedTicks);
-            //s.Reset();
-            //s.Start();
-            //for (int i = 0; i < iterations; i++)
-            //{
-            //    print_float2("100.0011"); // 4.1875
-            //}
-            //s.Stop();
-            //Console.WriteLine(s.ElapsedTicks);
-            print_float("100.0011"); // 4.1875
-            print_float2("100.0011"); // 4.1875
+            int iterations = 10000000;
+            Stopwatch s = new Stopwatch();
+            s.Start();
+            for (int i = 0; i < iterations; i++)
+            {
+                print_float("100.0011"); // 4.1875
+            }
+            s.Stop();
+            Console.WriteLine(s.ElapsedTicks);
+            s.Reset();
+            s.Start();
+            for (int i = 0; i < iterations; i++)
+            {
+                print_float2("100.0011"); // 4.1875
+            }
+            s.Stop();
+            Console.WriteLine(s.ElapsedTicks);
+            //print_float("100.0011"); // 4.1875
+            //print_float2("100.0011"); // 4.1875
 			Console.ReadKey();
 		}
 	}
