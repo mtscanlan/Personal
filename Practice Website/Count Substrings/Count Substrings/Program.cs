@@ -4,16 +4,15 @@ namespace Count_Substrings {
 	class Program {
 
 		/*
-			Given a character c and and a string t
+			String "aa" will have the following non-overlapping occurrences in string "aaabaaaaa"
+			Given two strings s and t
 			Your task is to
-			write a function that prints to standard output (stdout)
-			the position of the first occurrence of character c in string t
-			-1 if the character is not found
+			write a function that prints to standard output (stdout) the number of non-overlapping occurrences of string s in string t
 			Note that your function will receive the following arguments:
-			c
-			which is a string of length 1 that contains the character you must search for
+			s
+			which is the string that you must search for
 			t
-			which is the string where you must search
+			which is the string where you have to search
 		*/
 
 		public static void count_substr(string s, string t) {
