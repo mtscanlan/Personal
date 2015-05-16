@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace Simple_Expression {
 	class Program {
@@ -19,50 +22,56 @@ namespace Simple_Expression {
 			public char LastOperator = ' ';
 		}
 
-		public static void compute_expression(string expr) {
+		public static void compute_expression(string expr) { // My solution
 			LinkedList<Node> parentNode = new LinkedList<Node>();
 			parentNode.AddLast(new Node());
 			LinkedListNode<Node> currentNode = parentNode.Last;
 
 			Action<int> Maths = (total) => {
-				if (currentNode != null) {
-					switch (currentNode.Value.LastOperator) {
-						case '+':
-							currentNode.Value.Value = currentNode.Value.Value + total;
-							break;
-						case '-':
-							currentNode.Value.Value = currentNode.Value.Value - total;
-							break;
-						case ' ':
-							currentNode.Value.Value = total;
-							break;
-						default:
-							break;
-					}
-					currentNode.Value.LastOperator = ' ';
+				switch (currentNode.Value.LastOperator) {
+					case '+':
+						currentNode.Value.Value += total;
+						break;
+					case '-':
+						currentNode.Value.Value -= total;
+						break;
+					case ' ':
+						currentNode.Value.Value = total;
+						break;
+					default:
+						break;
 				}
+				currentNode.Value.LastOperator = ' ';
 			};
 			
 			foreach (char c in expr) {
 				if (c == '+' || c == '-') {
 					currentNode.Value.LastOperator = c;
-				} else if (Char.IsDigit(c)) {
-					Maths(c - 48);
 				} else if (c == '(') {
 					parentNode.AddLast(new Node());
 					currentNode = parentNode.Last;
-				} else {
+				} else if (c == ')') {
 					int total = currentNode.Value.Value;
 					LinkedListNode<Node> tempNode = currentNode;
 					currentNode = currentNode.Previous;
 					parentNode.Remove(tempNode);
 					Maths(total);
+				} else {
+					Maths(c - '0');
 				}
 			}
 			Console.WriteLine(currentNode.Value.Value);
 		}
 
 		static void Main(string[] args) {
+			//int iterations = 1000000;
+			//Stopwatch s = new Stopwatch();
+			//s.Start();
+			//for (int i = 0; i < iterations; i++) {
+			//	compute_expression("(2+2)-(3-(6-5))-4");
+			//}
+			//s.Stop();
+			//Console.WriteLine(s.ElapsedTicks);
 			compute_expression("(2+2)-(3-(6-5))-4");
 			Console.ReadKey();
 		}
