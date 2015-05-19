@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Count Tokens", "Count Tokens\Count Tokens.csproj", "{7998CD95-6527-4971-9DD3-F5DB062F3791}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7998CD95-6527-4971-9DD3-F5DB062F3791}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7998CD95-6527-4971-9DD3-F5DB062F3791}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7998CD95-6527-4971-9DD3-F5DB062F3791}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7998CD95-6527-4971-9DD3-F5DB062F3791}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

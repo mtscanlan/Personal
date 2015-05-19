@@ -24,7 +24,7 @@ namespace Binary_Float
 			for (int i = 0; i < integerPartLength; i++)
 			{
 				multiple = multiple >> 1;
-                int x = integerPart[i] - 48;
+				int x = integerPart[i] - '0'; // assumption that integerPart will be numeric
 				total += x * multiple;
 			}
 
@@ -32,10 +32,10 @@ namespace Binary_Float
 			for (int i = 0; i < fractionPartLength; i++)
             {
                 multiple = multiple << 1;
-                int x = fractionPart[i] - 48;
+				int x = fractionPart[i] - '0'; // assumption that integerPart will be numeric
 				total += (double)x / multiple;
 			}
-            Console.WriteLine("{0}", total);
+			Console.WriteLine("{0}", total);
 		}
 
 		public static void print_float2(string s) // Top solution
