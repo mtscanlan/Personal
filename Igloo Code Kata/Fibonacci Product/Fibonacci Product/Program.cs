@@ -42,8 +42,8 @@ namespace Fibonnaci_Product
         {
             Tuple<int, int, bool> result = FibProduct(104); // 8, 13, true
             Tuple<int, int, bool> result2 = FibProduct(103); // 8, 13, false
-            Tuple<int, int, bool> result3 = FibProduct(Int32.MaxValue); // 8, 13, false
-            Tuple<int, int, bool> result4 = FibProduct(Int32.MinValue); // 8, 13, false
+            Tuple<int, int, bool> result3 = FibProduct(Int32.MaxValue); // 46368, 75025, false
+            Tuple<int, int, bool> result4 = FibProduct(Int32.MinValue); // 0, 1, false
 
             Console.WriteLine("{0}, {1}, {2}", result.Item1, result.Item2, result.Item3);
             Console.WriteLine("{0}, {1}, {2}", result2.Item1, result2.Item2, result2.Item3);
