@@ -19,27 +19,22 @@ namespace Fibonnaci_Product
             F(n) * F(n+1) > prod.
         */
 
-        private static Tuple<int, int, bool> FibProduct(int product)
-        {
+        private static Tuple<int, int, bool> FibProduct(int product) {
             if (product < 1) 
                 return Tuple.Create(0, 1, product == 0);
 
             Func<int, int, Tuple<int, int, bool>> GetFibSeq = null;
-            GetFibSeq = (prev, curr) =>
-            {
+            GetFibSeq = (prev, curr) => {
                 long currentProduct = (long)prev * (long)curr;
                 if (currentProduct < product)
-                {
                     return GetFibSeq(curr, prev + curr);
-                }
                 return Tuple.Create(prev, curr, currentProduct == product);
             };
 
-            return GetFibSeq(0, 1);
+            return GetFibSeq(1, 1);
         }
 
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
             Tuple<int, int, bool> result = FibProduct(104); // 8, 13, true
             Tuple<int, int, bool> result2 = FibProduct(103); // 8, 13, false
             Tuple<int, int, bool> result3 = FibProduct(Int32.MaxValue); // 46368, 75025, false
