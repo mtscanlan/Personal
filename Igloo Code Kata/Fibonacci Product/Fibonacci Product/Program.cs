@@ -22,8 +22,14 @@ namespace Fibonnaci_Product
         private static Tuple<int, int, bool> GetFibSeq(int previous, int current, int product)
         {
             int currentProduct = previous * current;
-            if (currentProduct < product) {
-                return GetFibSeq(current, previous + current, product);
+            //if (currentProduct < product) {
+            //    return GetFibSeq(current, previous + current, product);
+            //}
+            while (currentProduct < product) {
+                int temp = previous;
+                previous = current;
+                current += temp;
+                currentProduct = current * previous;
             }
             return Tuple.Create(previous, current, currentProduct == product);
         }
