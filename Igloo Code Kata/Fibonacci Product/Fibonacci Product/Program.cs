@@ -15,18 +15,17 @@ namespace Fibonnaci_Product
             F(n) * F(n+1) = prod.
             Your method takes an integer (prod) and returns a triple (Tuple<int, int, bool>) where Item1 is the F(n), 
             Item2 is F(n+1), and Item3 is whether or not the product of these integers is equal to the provided parameter.
-            If there is not an equal product, F(n) will be the smallest integer in the Fibonacci sequence such as F(n) * F(n+1) > prod.
+            If there is not an equal product, F(n) will be the smallest integer in the Fibonacci sequence such as 
+            F(n) * F(n+1) > prod.
         */
 
         private static Tuple<int, int, bool> GetFibSeq(int previous, int current, int product)
         {
             int currentProduct = previous * current;
-            if (currentProduct < product)
+            if (currentProduct < product) {
                 return GetFibSeq(current, previous + current, product);
-            else if (currentProduct > product)
-                return Tuple.Create(previous, current, false);
-            else
-                return Tuple.Create(previous, current, true);
+            }
+            return Tuple.Create(previous, current, currentProduct == product);
         }
 
         private static Tuple<int, int, bool> FibProduct(int prod)
