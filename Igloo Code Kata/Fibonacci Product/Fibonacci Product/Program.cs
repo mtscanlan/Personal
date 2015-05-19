@@ -19,36 +19,37 @@ namespace Fibonnaci_Product
             F(n) * F(n+1) > prod.
         */
 
-        private static Tuple<int, int, bool> GetFibSeq(int previous, int current, int product)
-        {
-            int currentProduct = previous * current;
-            if (currentProduct < product) {
-                return GetFibSeq(current, previous + current, product);
-            }
-            return Tuple.Create(previous, current, currentProduct == product);
-        }
-
         private static Tuple<int, int, bool> FibProduct(int product)
         {
-            //return GetFibSeq(0, 1, product);
-            int previous = 0, current = 1;
-            int currentProduct = previous * current;
-            while (currentProduct < product)
+            if (product < 1) 
+                return Tuple.Create(0, 1, product == 0);
+
+            Func<int, int, Tuple<int, int, bool>> GetFibSeq = null;
+            GetFibSeq = (prev, curr) =>
             {
-                int temp = previous;
-                previous = current;
-                current += temp;
-                currentProduct = current * previous;
-            }
-            return Tuple.Create(previous, current, currentProduct == product);
+                long currentProduct = (long)prev * (long)curr;
+                if (currentProduct < product)
+                {
+                    return GetFibSeq(curr, prev + curr);
+                }
+                return Tuple.Create(prev, curr, currentProduct == product);
+            };
+
+            return GetFibSeq(0, 1);
         }
 
         static void Main(string[] args)
         {
             Tuple<int, int, bool> result = FibProduct(104); // 8, 13, true
             Tuple<int, int, bool> result2 = FibProduct(103); // 8, 13, false
+            Tuple<int, int, bool> result3 = FibProduct(Int32.MaxValue); // 8, 13, false
+            Tuple<int, int, bool> result4 = FibProduct(Int32.MinValue); // 8, 13, false
+
             Console.WriteLine("{0}, {1}, {2}", result.Item1, result.Item2, result.Item3);
             Console.WriteLine("{0}, {1}, {2}", result2.Item1, result2.Item2, result2.Item3);
+            Console.WriteLine("{0}, {1}, {2}", result3.Item1, result3.Item2, result3.Item3);
+            Console.WriteLine("{0}, {1}, {2}", result4.Item1, result4.Item2, result4.Item3);
+
             Console.ReadKey();
         }
     }
