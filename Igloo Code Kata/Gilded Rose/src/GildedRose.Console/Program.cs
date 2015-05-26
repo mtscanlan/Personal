@@ -55,10 +55,12 @@ namespace GildedRose
 
         static void Main(string[] args) {
             Console.WriteLine(string.Join("\n", Items.Select(x => String.Format("Name: {0} SellIn: {1} Quality: {2}", x.Name, x.SellIn, x.Quality))));
+            Console.WriteLine("\n");
             do
             {
                 UpdateQuality();
                 Console.WriteLine(string.Join("\n", ExpiringItems));
+                Console.WriteLine("\n");
             } while (ExpiringItems.Any(x => x.Item.SellIn > 0));
             Console.ReadKey();
         }
@@ -68,25 +70,18 @@ namespace GildedRose
         private static List<ExpiringItem> ExpiringItems = null;
         public class ExpiringItem
         {
-            public int DegradationValue { get; set; }
-            public int ExpiredDegradationValue { get; set; }
-            public Action<ExpiringItem> CustomDegradation { get; set; }
+            public Action<ExpiringItem> DegradeQuality { get; set; }
             public Item Item { get; private set; }
 
             public ExpiringItem(Item item)
             {
                 Item = item;
-
-                DegradationValue = -1;
-                ExpiredDegradationValue = -2;
-                CustomDegradation = (expiringitem) => { };
-            }
-
-            public void UpdateQuality()
-            {
-                Item.Quality += Item.SellIn >= 0 ? DegradationValue : ExpiredDegradationValue;
-                Item.Quality = Item.Quality < 0 ? 0 : Item.Quality;
-                Item.Quality = Item.Quality > 50 ? 50 : Item.Quality;
+                DegradeQuality = (expiringitem) =>
+                {
+                    Item.Quality += Item.SellIn >= 0 ? -1 : -2;
+                    Item.Quality = Item.Quality < 0 ? 0 : Item.Quality;
+                    Item.Quality = Item.Quality > 50 ? 50 : Item.Quality;
+                };
             }
 
             public override string ToString()
@@ -102,46 +97,44 @@ namespace GildedRose
                 foreach (var item in Items)
                 {
                     ExpiringItem expiringItem = null;
+
                     if (item.Name == "Aged Brie")
                     {
                         expiringItem = new ExpiringItem(item)
                         {
-                            DegradationValue = 1,
-                            ExpiredDegradationValue = 2
+                            DegradeQuality = (x) =>
+                            {
+                                x.Item.Quality += x.Item.SellIn >= 0 ? 1 : 2;
+                                x.Item.Quality = x.Item.Quality < 0 ? 0 : x.Item.Quality;
+                                x.Item.Quality = x.Item.Quality > 50 ? 50 : x.Item.Quality;
+                            }
                         };
                     }
                     else if (item.Name == "Sulfuras, Hand of Ragnaros")
                     {
-                        expiringItem = new ExpiringItem(item)
-                        {
-                            CustomDegradation = (x) =>
-                            {
-                                x.Item.Quality = 80;
-                                x.Item.SellIn = 0;
-                            }
-                        };
+                        expiringItem = new ExpiringItem(item) { DegradeQuality = (x) => { x.Item.SellIn = 0; } };
                     }
                     else if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
                     {
                         expiringItem = new ExpiringItem(item)
                         {
-                            DegradationValue = 1,
-                            ExpiredDegradationValue = 0,
-                            CustomDegradation = (x) =>
+                            DegradeQuality = (x) =>
                             {
-                                if (x.Item.SellIn < 0)
+                                if (x.Item.SellIn >= 0 && x.Item.SellIn <= 5)
                                 {
-                                    x.DegradationValue = 0;
-                                    x.Item.Quality = 0;
+                                    x.Item.Quality += 3;
                                 }
-                                else if (x.Item.SellIn <= 5)
+                                else if (x.Item.SellIn >= 0 && x.Item.SellIn < 10)
                                 {
-                                    x.DegradationValue = 3;
+                                    x.Item.Quality += 2;
                                 }
-                                else if (x.Item.SellIn <= 10)
+                                else
                                 {
-                                    x.DegradationValue = 2;
+                                    x.Item.Quality += 1;
                                 }
+
+                                x.Item.Quality = x.Item.Quality < 0 ? 0 : x.Item.Quality;
+                                x.Item.Quality = x.Item.Quality > 50 ? 50 : x.Item.Quality;
                             }
                         };
                     }
@@ -149,14 +142,19 @@ namespace GildedRose
                     {
                         expiringItem = new ExpiringItem(item)
                         {
-                            DegradationValue = -2,
-                            ExpiredDegradationValue = -4
+                            DegradeQuality = (x) =>
+                            {
+                                x.Item.Quality += x.Item.SellIn >= 0 ? -2 : -4;
+                                x.Item.Quality = x.Item.Quality < 0 ? 0 : x.Item.Quality;
+                                x.Item.Quality = x.Item.Quality > 50 ? 50 : x.Item.Quality;
+                            }
                         };
                     }
                     else
                     {
                         expiringItem = new ExpiringItem(item);
                     }
+
                     ExpiringItems.Add(expiringItem);
                 }
             }
@@ -164,10 +162,10 @@ namespace GildedRose
             foreach (var item in ExpiringItems)
             {
                 item.Item.SellIn--;
-                item.UpdateQuality();
-                item.CustomDegradation(item);
+                item.DegradeQuality(item);
             }
         }
+        
         // ************* END OF MATTHEWS SOLUTION *************
     }
     
