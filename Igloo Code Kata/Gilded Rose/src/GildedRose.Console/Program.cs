@@ -65,7 +65,7 @@ namespace GildedRose
 
         // ************* MATTHEWS SOLUTION *************
 
-        private static List<ExpiringItem> ExpiringItems = new List<ExpiringItem>();
+        private static List<ExpiringItem> ExpiringItems = null;
         public class ExpiringItem
         {
             public int DegradationValue { get; set; }
@@ -96,7 +96,7 @@ namespace GildedRose
         }
 
         public static void UpdateQuality() {
-            if (ExpiringItems.Count == 0)
+            if (ExpiringItems == null)
             {
                 ExpiringItems = new List<ExpiringItem>();
                 foreach (var item in Items)
@@ -107,14 +107,18 @@ namespace GildedRose
                         expiringItem = new ExpiringItem(item)
                         {
                             DegradationValue = 1,
-                            ExpiredDegradationValue = 1
+                            ExpiredDegradationValue = 2
                         };
                     }
                     else if (item.Name == "Sulfuras, Hand of Ragnaros")
                     {
                         expiringItem = new ExpiringItem(item)
                         {
-                            CustomDegradation = (x) => x.Item.Quality = 80
+                            CustomDegradation = (x) =>
+                            {
+                                x.Item.Quality = 80;
+                                x.Item.SellIn = 0;
+                            }
                         };
                     }
                     else if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
