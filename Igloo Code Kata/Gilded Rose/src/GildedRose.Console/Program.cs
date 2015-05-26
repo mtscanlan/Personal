@@ -1,123 +1,78 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 
-namespace GildedRose.Console
+namespace GildedRose
 {
     class Program
     {
-        IList<Item> Items;
-        static void Main(string[] args)
-        {
-            System.Console.WriteLine("OMGHAI!");
+        private static IList<ExpiringItem> Items = new List<ExpiringItem>() {
+            new ExpiringItem {Name = "+5 Dexterity Vest", SellIn = 10, Quality = 20},
+            new ExpiringItem {Name = "Aged Brie", SellIn = 2, Quality = 0, DegradationValue = 1, ExpiredDegradationValue = 1},
+            new ExpiringItem {Name = "Elixir of the Mongoose", SellIn = 5, Quality = 7},
+            new ExpiringItem {Name = "Sulfuras, Hand of Ragnaros", SellIn = 0, Quality = 80, CustomDegradation = (expiringItem) => expiringItem.Quality = 80},
+            new ExpiringItem {Name = "Backstage passes to a TAFKAL80ETC concert", SellIn = 15, Quality = 20, DegradationValue = 1, ExpiredDegradationValue = 0,
+                CustomDegradation = (expiringItem) => {
+                    if (expiringItem.SellIn < 0) {
+                        expiringItem.DegradationValue = 0;
+                        expiringItem.Quality = 0;
+                    } else if (expiringItem.SellIn <= 5) {
+                        expiringItem.DegradationValue = 3;
+                    } else if (expiringItem.SellIn <= 10) {
+                        expiringItem.DegradationValue = 2;
+                    }
+                }},
+            new ExpiringItem {Name = "Conjured Mana Cake", SellIn = 3, Quality = 6, DegradationValue = -2, ExpiredDegradationValue = -4}
+        };
 
-            var app = new Program()
-                          {
-                              Items = new List<Item>
-                                          {
-                                              new Item {Name = "+5 Dexterity Vest", SellIn = 10, Quality = 20},
-                                              new Item {Name = "Aged Brie", SellIn = 2, Quality = 0},
-                                              new Item {Name = "Elixir of the Mongoose", SellIn = 5, Quality = 7},
-                                              new Item {Name = "Sulfuras, Hand of Ragnaros", SellIn = 0, Quality = 80},
-                                              new Item
-                                                  {
-                                                      Name = "Backstage passes to a TAFKAL80ETC concert",
-                                                      SellIn = 15,
-                                                      Quality = 20
-                                                  },
-                                              new Item {Name = "Conjured Mana Cake", SellIn = 3, Quality = 6}
-                                          }
 
-                          };
 
-            app.UpdateQuality();
-
-            System.Console.ReadKey();
-
+        static void Main(string[] args) {
+            Console.WriteLine(string.Join("\n", Items));
+            while(Items.Any(x => x.SellIn >= 0)) {
+                UpdateQuality();
+                Console.WriteLine(string.Join("\n", Items));
+            }
+            Console.ReadKey();
         }
 
-        public void UpdateQuality()
+        private class ExpiringItem : Item
         {
-            for (var i = 0; i < Items.Count; i++)
+            public int DegradationValue { get; set; }
+            public int ExpiredDegradationValue { get; set; }
+            public Action<ExpiringItem> CustomDegradation { get; set; }
+
+            public ExpiringItem()
             {
-                if (Items[i].Name != "Aged Brie" && Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                {
-                    if (Items[i].Quality > 0)
-                    {
-                        if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                        {
-                            Items[i].Quality = Items[i].Quality - 1;
-                        }
-                    }
-                }
-                else
-                {
-                    if (Items[i].Quality < 50)
-                    {
-                        Items[i].Quality = Items[i].Quality + 1;
+                DegradationValue = -1;
+                ExpiredDegradationValue = -2;
+                CustomDegradation = (expiringitem) => { };
+            }
 
-                        if (Items[i].Name == "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].SellIn < 11)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
+            public void UpdateQuality() {
+                Quality += SellIn >= 0 ? DegradationValue : ExpiredDegradationValue;
+                Quality = Quality < 0 ? 0 : Quality;
+                Quality = Quality > 50 ? 50 : Quality;
+            }
 
-                            if (Items[i].SellIn < 6)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                {
-                    Items[i].SellIn = Items[i].SellIn - 1;
-                }
-
-                if (Items[i].SellIn < 0)
-                {
-                    if (Items[i].Name != "Aged Brie")
-                    {
-                        if (Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].Quality > 0)
-                            {
-                                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                                {
-                                    Items[i].Quality = Items[i].Quality - 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Items[i].Quality = Items[i].Quality - Items[i].Quality;
-                        }
-                    }
-                    else
-                    {
-                        if (Items[i].Quality < 50)
-                        {
-                            Items[i].Quality = Items[i].Quality + 1;
-                        }
-                    }
-                }
+            public override string ToString()
+            {
+                return String.Format("Name: {0} SellIn: {1} Quality: {2}", Name, SellIn, Quality);
+            }
+        }
+        public static void UpdateQuality() {
+            foreach (var item in Items) {
+                item.SellIn--;
+                item.UpdateQuality();
+                item.CustomDegradation(item);
             }
         }
 
     }
 
-    public class Item
-    {
+    public class Item {
         public string Name { get; set; }
-
         public int SellIn { get; set; }
-
         public int Quality { get; set; }
     }
 
