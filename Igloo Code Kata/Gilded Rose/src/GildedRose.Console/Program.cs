@@ -55,33 +55,46 @@ namespace GildedRose
 
         static void Main(string[] args) {
             Console.WriteLine(string.Join("\n", Items.Select(x => String.Format("Name: {0} SellIn: {1} Quality: {2}", x.Name, x.SellIn, x.Quality))));
-            Console.WriteLine("\n");
+
             do
             {
                 UpdateQuality();
                 Console.WriteLine(string.Join("\n", ExpiringItems));
-                Console.WriteLine("\n");
             } while (ExpiringItems.Any(x => x.Item.SellIn > 0));
+
             Console.ReadKey();
         }
 
         // ************* MATTHEWS SOLUTION *************
 
+        private const string AGED_BRIE = "Aged Brie";
+        private const string BACKSTAGE_PASSES_TAFKAL80ETC_CONCERT = "Backstage passes to a TAFKAL80ETC concert";
+        private const string CONJURED_MANA_CAKE = "Conjured Mana Cake";
+        private const string SULFURAS_HAND_OF_RAGNAROS = "Sulfuras, Hand of Ragnaros";
+
         private static List<ExpiringItem> ExpiringItems = null;
-        public class ExpiringItem
+
+        public interface IExpiringItem
         {
-            public Action<ExpiringItem> DegradeQuality { get; set; }
+            Item Item { get; }
+            void DegradeQuality();
+        }
+
+        public class ExpiringItem : IExpiringItem
+        {
             public Item Item { get; private set; }
 
             public ExpiringItem(Item item)
             {
                 Item = item;
-                DegradeQuality = (expiringitem) =>
-                {
-                    Item.Quality += Item.SellIn >= 0 ? -1 : -2;
-                    Item.Quality = Item.Quality < 0 ? 0 : Item.Quality;
-                    Item.Quality = Item.Quality > 50 ? 50 : Item.Quality;
-                };
+            }
+
+            public virtual void DegradeQuality()
+            {
+                Item.SellIn--;
+                Item.Quality += Item.SellIn >= 0 ? -1 : -2;
+                Item.Quality = Item.Quality < 0 ? 0 : Item.Quality;
+                Item.Quality = Item.Quality > 50 ? 50 : Item.Quality;
             }
 
             public override string ToString()
@@ -90,65 +103,88 @@ namespace GildedRose
             }
         }
 
+        public class AgedBrieExpringItem : ExpiringItem
+        {
+            public AgedBrieExpringItem(Item item) : base(item) { }
+
+            public override void DegradeQuality()
+            {
+                Item.SellIn--;
+                Item.Quality += Item.SellIn >= 0 ? 1 : 2;
+                Item.Quality = Item.Quality < 0 ? 0 : Item.Quality;
+                Item.Quality = Item.Quality > 50 ? 50 : Item.Quality;
+            }
+        }
+
+        public class BackStagePassExpringItem : ExpiringItem
+        {
+            public BackStagePassExpringItem(Item item) : base(item) { }
+
+            public override void DegradeQuality()
+            {
+                Item.SellIn--;
+                if (Item.SellIn >= 0 && Item.SellIn <= 5)
+                {
+                    Item.Quality += 3;
+                }
+                else if (Item.SellIn >= 0 && Item.SellIn < 10)
+                {
+                    Item.Quality += 2;
+                }
+                else
+                {
+                    Item.Quality += 1;
+                }
+
+                Item.Quality = Item.Quality < 0 ? 0 : Item.Quality;
+                Item.Quality = Item.Quality > 50 ? 50 : Item.Quality;
+            }
+        }
+
+        public class ConjuredExpringItem : ExpiringItem
+        {
+            public ConjuredExpringItem(Item item) : base(item) { }
+
+            public override void DegradeQuality()
+            {
+                Item.SellIn--;
+                Item.Quality += Item.SellIn >= 0 ? -2 : -4;
+                Item.Quality = Item.Quality < 0 ? 0 : Item.Quality;
+                Item.Quality = Item.Quality > 50 ? 50 : Item.Quality;
+            }
+        }
+
+        public class SulfurasHandOfRagnarosExpiringItem : ExpiringItem
+        {
+            public SulfurasHandOfRagnarosExpiringItem(Item item) : base(item) { }
+            public override void DegradeQuality() { } // Override this but do nothing.
+
+        }
+
         public static void UpdateQuality() {
             if (ExpiringItems == null)
             {
                 ExpiringItems = new List<ExpiringItem>();
+
                 foreach (var item in Items)
                 {
-                    ExpiringItem expiringItem = null;
+                    ExpiringItem expiringItem;
 
-                    if (item.Name == "Aged Brie")
+                    if (item.Name == AGED_BRIE)
                     {
-                        expiringItem = new ExpiringItem(item)
-                        {
-                            DegradeQuality = (x) =>
-                            {
-                                x.Item.Quality += x.Item.SellIn >= 0 ? 1 : 2;
-                                x.Item.Quality = x.Item.Quality < 0 ? 0 : x.Item.Quality;
-                                x.Item.Quality = x.Item.Quality > 50 ? 50 : x.Item.Quality;
-                            }
-                        };
+                        expiringItem = new AgedBrieExpringItem(item);
                     }
-                    else if (item.Name == "Sulfuras, Hand of Ragnaros")
+                    else if (item.Name == BACKSTAGE_PASSES_TAFKAL80ETC_CONCERT)
                     {
-                        expiringItem = new ExpiringItem(item) { DegradeQuality = (x) => { x.Item.SellIn = 0; } };
+                        expiringItem = new BackStagePassExpringItem(item);
                     }
-                    else if (item.Name == "Backstage passes to a TAFKAL80ETC concert")
+                    else if (item.Name == CONJURED_MANA_CAKE)
                     {
-                        expiringItem = new ExpiringItem(item)
-                        {
-                            DegradeQuality = (x) =>
-                            {
-                                if (x.Item.SellIn >= 0 && x.Item.SellIn <= 5)
-                                {
-                                    x.Item.Quality += 3;
-                                }
-                                else if (x.Item.SellIn >= 0 && x.Item.SellIn < 10)
-                                {
-                                    x.Item.Quality += 2;
-                                }
-                                else
-                                {
-                                    x.Item.Quality += 1;
-                                }
-
-                                x.Item.Quality = x.Item.Quality < 0 ? 0 : x.Item.Quality;
-                                x.Item.Quality = x.Item.Quality > 50 ? 50 : x.Item.Quality;
-                            }
-                        };
+                        expiringItem = new ConjuredExpringItem(item);
                     }
-                    else if (item.Name == "Conjured Mana Cake")
+                    else if (item.Name == SULFURAS_HAND_OF_RAGNAROS)
                     {
-                        expiringItem = new ExpiringItem(item)
-                        {
-                            DegradeQuality = (x) =>
-                            {
-                                x.Item.Quality += x.Item.SellIn >= 0 ? -2 : -4;
-                                x.Item.Quality = x.Item.Quality < 0 ? 0 : x.Item.Quality;
-                                x.Item.Quality = x.Item.Quality > 50 ? 50 : x.Item.Quality;
-                            }
-                        };
+                        expiringItem = new SulfurasHandOfRagnarosExpiringItem(item);
                     }
                     else
                     {
@@ -161,8 +197,7 @@ namespace GildedRose
 
             foreach (var item in ExpiringItems)
             {
-                item.Item.SellIn--;
-                item.DegradeQuality(item);
+                item.DegradeQuality();
             }
         }
         
