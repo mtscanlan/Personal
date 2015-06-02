@@ -27,7 +27,7 @@ namespace HuffmanCompressor
 
                 // 2 *****
                 Array.Resize(ref inputText, i + 1);
-                binaryText = String.Join("", compressedText.Select(x => Convert.ToString(x, 2)));
+                binaryText = String.Join("", compressedText.Select(x => Convert.ToString(x, 2).PadLeft(8, '0')));
                 maskLength = binaryText.Substring(binaryText.Length - 8).Count(x => x == '0');
                 binaryText = binaryText.Substring(0, binaryText.Length - 8 - maskLength);
             }
@@ -72,21 +72,23 @@ namespace HuffmanCompressor
             string outputText = string.Empty;
             {
                 HuffmanTree currentNode = rootNode;
-                for (int i = 0; i < binaryText.Length; i++)
+                for (int i = 0; i <= binaryText.Length; i++)
                 {
-                    if (binaryText[i] == '0' && currentNode.LeftChild != null)
+                    if (currentNode.Value != null)
                     {
-                        currentNode = currentNode.LeftChild;
-                    }
-                    else if (binaryText[i] == '1' && currentNode.RightChild != null)
-                    {
-                        currentNode = currentNode.RightChild;
-                    }
-                    else 
-                    {
+                        if (i != binaryText.Length) i--;
                         outputText += currentNode.Value;
                         currentNode = rootNode;
                     }
+                    else if (binaryText[i] == '0')
+                    {
+                        currentNode = currentNode.LeftChild;
+                    }
+                    else if (binaryText[i] == '1')
+                    {
+                        currentNode = currentNode.RightChild;
+                    }
+                    "".ToString();
                 }
                 "".ToString();
             }
