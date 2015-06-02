@@ -90,6 +90,11 @@ namespace HuffmanCompressor
                 }
                 "".ToString();
             }
+
+            using (StreamWriter outfile = new StreamWriter(outputPath))
+            {
+                outfile.Write(outputText.ToString());
+            }
         }
     }
 }
