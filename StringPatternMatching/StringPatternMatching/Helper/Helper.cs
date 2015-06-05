@@ -29,11 +29,10 @@ namespace StringPatternMatching {
 			Parallel.ForEach(text.Result, parallelAction);
 		}
 
-		public static bool SlidingStringDistance(string shortWord, string longWord, double threshold, out double score) {
+		public static bool SlidingStringDistance(string shortWord, string longWord, double threshold) {
 			bool foundCondition = false;
-			score = 0;
 			for (int i = 0; i < longWord.Length - shortWord.Length; i++) {
-				score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(i, shortWord.Length)).Value;
+				double score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(i, shortWord.Length));
 				foundCondition = score >= threshold;
 				if (foundCondition) break;
 			}

@@ -68,11 +68,9 @@ namespace StringPatternMatching {
 			Parallel.ForEach(Products, p => {
 				p.Value.MatchedListings = new ConcurrentBag<long>();
 				Parallel.ForEach(Listings, l => {
-					SqlDouble manufacturerScore = 0;
-					if ((manufacturerScore = UserDefinedFunctions.StringDistance(l.Value.manufacturer, p.Value.manufacturer)) >= 0.85) {
-						double modelScore = 0;
+					if (UserDefinedFunctions.StringDistance(l.Value.manufacturer, p.Value.manufacturer) >= 0.85) {
 						string trimmedProductModel = Helper.TrimCharacters(p.Value.model);
-						if (Helper.SlidingStringDistance(trimmedProductModel, l.Value.KeyWordsString, 0.92, out modelScore)) {
+						if (Helper.SlidingStringDistance(trimmedProductModel, l.Value.KeyWordsString, 0.92)) {
 							p.Value.MatchedListings.Add(l.Key);
 						} 
 					} 
