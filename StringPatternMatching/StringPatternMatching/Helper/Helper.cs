@@ -11,6 +11,36 @@ using Newtonsoft.Json;
 namespace StringPatternMatching {
 	public class Helper {
 
+        public static double ConvertForex(string p, double val) {
+            switch (p) {
+                case "CAD":
+                    return val * 0.8;
+                case "EUR":
+                    return val * 1.11;
+                case "GBP":
+                    return val * 1.53;
+                case "USD":
+                default:
+                    return val;
+            }
+        }
+
+        public static double Percentile(IEnumerable<double> sequence, double percentile = 0.5) {
+            SortedSet<double> sortedSequence = new SortedSet<double>(sequence);
+            int N = sortedSequence.Count;
+            if (N > 0) {
+                double n = (N - 1) * percentile + 1;
+                if (n == 1d) return sortedSequence.First();
+                else if (n == N) return sortedSequence.Last();
+                else {
+                    int k = (int)n;
+                    double d = n - k;
+                    return sortedSequence.ElementAt(k - 1) + d * (sortedSequence.ElementAt(k) - sortedSequence.ElementAt(k - 1));
+                }
+            }
+            else return 0;
+        }
+
 		public static void PrintJson(string path, object jsonObject) {
 			using (TextWriter writer = new StreamWriter(path))
 				writer.Write(JsonConvert.SerializeObject(jsonObject, Formatting.Indented));
@@ -53,36 +83,5 @@ namespace StringPatternMatching {
 		public static string TrimCharacters(string words) {
 			return Regex.Replace(words, "[,_\\+\\- ]", "");
 		}
-
-        public static double Percentile(IEnumerable<double> sequence, double percentile = 0.5) {
-            SortedSet<double> sortedSequence = new SortedSet<double>(sequence);
-            int N = sortedSequence.Count;
-            if (N > 0) {
-                double n = (N - 1) * percentile + 1;
-                if (n == 1d) return sortedSequence.First();
-                else if (n == N) return sortedSequence.Last();
-                else {
-                    int k = (int)n;
-                    double d = n - k;
-                    return sortedSequence.ElementAt(k - 1) + d * (sortedSequence.ElementAt(k) - sortedSequence.ElementAt(k - 1));
-                }
-            }
-            else return 0;
-        }
-
-
-        internal static double ConvertForex(string p, double val) {
-            switch (p) {
-                case "CAD":
-                    return val * 0.8;
-                case "EUR":
-                    return val * 1.11;
-                case "GBP":
-                    return val * 1.53;
-                case "USD":
-                default:
-                    return val;
-            }
-        }
     }
 }

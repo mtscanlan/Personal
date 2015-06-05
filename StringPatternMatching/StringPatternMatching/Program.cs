@@ -41,11 +41,11 @@ namespace StringPatternMatching {
 			Parallel.ForEach(Products, product => {
 				product.Value.MatchedListings = new ConcurrentBag<long>();
 				Parallel.ForEach(Listings, listing => {
-                    string trimmedProductModel = Helper.TrimCharacters(product.Value.model);
-                    if (Helper.SlidingStringDistance(product.Value.manufacturer, listing.Value.manufacturer, 0.85) != -1 &&
-                        Helper.SlidingStringDistance(trimmedProductModel, listing.Value.KeyWordsString, 1.0) != -1) {
-                        // A lot of false positives here, M90 will match M900 for example. 
-                        product.Value.MatchedListings.Add(listing.Key);
+                    if (UserDefinedFunctions.StringDistance(listing.Value.manufacturer, product.Value.manufacturer) >= 0.85) {
+                        string trimmedProductModel = Helper.TrimCharacters(product.Value.model);
+                        if (Helper.SlidingStringDistance(trimmedProductModel, listing.Value.KeyWordsString, 0.92) != -1) {
+                            product.Value.MatchedListings.Add(listing.Key);
+                        }
                     }
 				});
 			});
