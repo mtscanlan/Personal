@@ -1,19 +1,18 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace StringPatternMatching {
 	public class Helper {
-		private const string REGEX_PATTERN_REPLACE_SPACE = "(?<!\\d)\\.(?!\\d)|[,_]";
-		private const string REGEX_PATTERN_REPLACE_EMPTY = "[-]";
 
-		public static string[] GetKeyWords(params string[] stringsToJoin) {
-			var modelKeyWords = string.Join(" ", stringsToJoin);
-			modelKeyWords = RegexReplace(modelKeyWords, REGEX_PATTERN_REPLACE_SPACE, " ");
-			modelKeyWords = RegexReplace(modelKeyWords, REGEX_PATTERN_REPLACE_EMPTY, "");
-			return modelKeyWords.Split(' ');
+		public static void PrintJson(string path, object jsonObject) {
+			using (TextWriter writer = new StreamWriter(path))
+				writer.Write(JsonConvert.SerializeObject(jsonObject, Formatting.Indented));
 		}
 
 		private static async Task<IEnumerable<string>> ReadCharacters(string fn) {
@@ -30,10 +29,19 @@ namespace StringPatternMatching {
 			Parallel.ForEach(text.Result, parallelAction);
 		}
 
-		private static string RegexReplace(string words, string pattern, string toValue) {
-			var regexReplace = new Regex(pattern);
-			return regexReplace.Replace(words, toValue);
+		public static bool SlidingStringDistance(string shortWord, string longWord, double threshold, out double score) {
+			bool foundCondition = false;
+			score = 0;
+			for (int i = 0; i < longWord.Length - shortWord.Length; i++) {
+				score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(i, shortWord.Length)).Value;
+				foundCondition = score >= threshold;
+				if (foundCondition) break;
+			}
+			return foundCondition;
+		}
 
+		public static string TrimCharacters(string words) {
+			return Regex.Replace(words, "[,_\\+\\- ]", "");
 		}
 	}
 }

@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace StringPatternMatching {
 	public class Product {
+
 		public string product_name { get; set; }
 		public string manufacturer { get; set; }
 		public string model { get; set; }
@@ -14,7 +16,6 @@ namespace StringPatternMatching {
 			set { _announceddate = DateTime.Parse(value); }
 		}
 
-		public HashSet<string> Words { get; set; }
-		public HashSet<long> MatchedListings { get; set; }
+		public ConcurrentBag<long> MatchedListings { get; set; }
 	}
 }

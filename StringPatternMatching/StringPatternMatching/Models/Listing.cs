@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace StringPatternMatching {
@@ -10,6 +11,10 @@ namespace StringPatternMatching {
 		public string price { get; set; }
 
 		[JsonIgnore]
-		public HashSet<string> Words { get; set; }
+		public string KeyWordsString { get; set; }
+
+		public override string ToString() {
+			return JsonConvert.SerializeObject(this);
+		}
 	}
 }

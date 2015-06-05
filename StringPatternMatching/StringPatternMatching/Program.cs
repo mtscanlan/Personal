@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -21,86 +22,68 @@ namespace StringPatternMatching {
 			sw.Start();
 
 			long increment = 0;
-
-			Helper.ReadFileAndPopulateData(@"products.txt", x => {
-				var product = JsonConvert.DeserializeObject<Product>(x);
-				var keyWords = Helper.GetKeyWords(product.family, product.manufacturer, product.model, product.product_name);
-				product.Words = new HashSet<string>(keyWords);
+			Helper.ReadFileAndPopulateData(@"products.txt", p => {
+				var product = JsonConvert.DeserializeObject<Product>(p);
 				Products.AddOrUpdate(Interlocked.Increment(ref increment), product, (k, v) => product);
 			});
 
-			var productWords = new HashSet<string>(Products.SelectMany(x => x.Value.Words));
-
-			Helper.ReadFileAndPopulateData(@"listings.txt", x => {
-				var listing = JsonConvert.DeserializeObject<Listing>(x);
-				var keyWords = Helper.GetKeyWords(listing.title, listing.manufacturer, listing.currency, listing.price);
-				listing.Words = new HashSet<string>(keyWords.Intersect(productWords));
+			increment = 0;
+			Helper.ReadFileAndPopulateData(@"listings.txt", l => {
+				var listing = JsonConvert.DeserializeObject<Listing>(l);
+				listing.KeyWordsString = Helper.TrimCharacters(listing.title);
 				Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
 			});
-
+			
 			sw.Stop();
 			Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
 			sw.Reset();
-
-			// testing
-			HashSet<string> manufacturers = new HashSet<string>(Listings.Select(x => x.Value.manufacturer));
-			HashSet<string> manufacturers2 = new HashSet<string>(Products.Select(x => x.Value.manufacturer));
-
 			sw.Start();
 
-			MatchProductsToListings();
+			// Match listings to their respective products
+			MatchListingsToProducts();
 
 			sw.Stop();
 			Console.WriteLine("Finished Matching Products : {0}s", sw.ElapsedMilliseconds / 1000f);
 			sw.Reset();
 			sw.Start();
 
-			Parallel.ForEach(Products, x => Results.Add(
-				new Result(x.Value.product_name,
-					Listings.Where(l => x.Value.MatchedListings.Contains(l.Key)).Select(l => l.Value))
-				));
+			// Populate the Results object from our matched listings in the Product object. 
+			PopulateResults();
 
 			sw.Stop();
 			Console.WriteLine("Populated Results : {0}s", sw.ElapsedMilliseconds / 1000f);
 			sw.Reset();
 			sw.Start();
 
-			using (TextWriter writer = new StreamWriter(@"results.txt"))
-				writer.Write(JsonConvert.SerializeObject(Results));
+			// Print the results
+			Helper.PrintJson(@"results.txt", new List<Result>(Results));
 
 			sw.Stop();
 			Console.WriteLine("Ding! Results Complete : {0}s", sw.ElapsedMilliseconds / 1000f);
 			Console.ReadKey();
 		}
 
-		private static void MatchProductsToListings() {
+		internal static void MatchListingsToProducts() {
 			ConcurrentDictionary<string, ConcurrentBag<string>> unmatchedresults = new ConcurrentDictionary<string, ConcurrentBag<string>>();
 			Parallel.ForEach(Products, p => {
-				// testing
-				unmatchedresults[p.Value.manufacturer] = new ConcurrentBag<string>();
-
-				p.Value.MatchedListings = new HashSet<long>();
+				p.Value.MatchedListings = new ConcurrentBag<long>();
 				Parallel.ForEach(Listings, l => {
 					SqlDouble manufacturerScore = 0;
-					if ((manufacturerScore = UserDefinedFunctions.StringDistance(l.Value.manufacturer, p.Value.manufacturer,
-						() => l.Value.manufacturer.IndexOf(p.Value.manufacturer, StringComparison.OrdinalIgnoreCase) >= 0)) >= 0.85) {
-						// Cool, we have it narrowed down to manufacturer, this still isn't 100% accurate.
-						Console.WriteLine("{0}{1}{2}", manufacturerScore, l.Value.manufacturer, p.Value.manufacturer);
-					} else {
-						// testing
-						unmatchedresults[p.Value.manufacturer].Add(l.Value.manufacturer);
-					}
+					if ((manufacturerScore = UserDefinedFunctions.StringDistance(l.Value.manufacturer, p.Value.manufacturer)) >= 0.85) {
+						double modelScore = 0;
+						string trimmedProductModel = Helper.TrimCharacters(p.Value.model);
+						if (Helper.SlidingStringDistance(trimmedProductModel, l.Value.KeyWordsString, 0.92, out modelScore)) {
+							p.Value.MatchedListings.Add(l.Key);
+						} 
+					} 
 				});
 			});
+		}
 
-			// testing
-			Dictionary<string, HashSet<string>> unmatchedoutput = new Dictionary<string, HashSet<string>>();
-			foreach (var res in unmatchedresults) {
-				unmatchedoutput[res.Key] = new HashSet<string>(res.Value);
-			}
-			using (TextWriter writer = new StreamWriter(@"unmatchedresults.txt"))
-				writer.Write(JsonConvert.SerializeObject(unmatchedoutput, Formatting.Indented));
-
+		internal static void PopulateResults() {
+			Parallel.ForEach(Products, x => Results.Add(
+				new Result(x.Value.product_name, Listings.Where(l => x.Value.MatchedListings.Contains(l.Key)).Select(l => l.Value))
+			));
 		}
 	}
 }

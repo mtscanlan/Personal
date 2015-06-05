@@ -2,8 +2,9 @@
 
 namespace StringPatternMatching {
 	public class Result {
-		private IEnumerable<Listing> listings;
-		private string product_name;
+
+		public string product_name;
+		public IEnumerable<Listing> listings;
 
 		public Result(string name, IEnumerable<Listing> list) {
 			product_name = name;

@@ -20,9 +20,9 @@ namespace StringPatternMatching {
 		/// <param name="firstWord"></param>
 		/// <param name="secondWord"></param>
 		/// <returns>a value between 0-1 of the similarity</returns>
-		public static SqlDouble StringDistance(string firstWord, string secondWord, Func<bool> additionalCheck) {
+		public static SqlDouble StringDistance(string firstWord, string secondWord) {
 			if ((firstWord != null) && (secondWord != null)) {
-				if (firstWord == secondWord || additionalCheck()) {
+				if (firstWord == secondWord) {
 					return defaultMatchScore;
 				}
 				//get half the length of the string rounded up - (this is the distance used for acceptable transpositions)

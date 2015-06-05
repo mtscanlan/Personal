@@ -7,8 +7,8 @@
     <ProjectGuid>{703BF46A-1C0D-40ED-8D6E-163794559198}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ConsoleApplication1</RootNamespace>
-    <AssemblyName>ConsoleApplication1</AssemblyName>
+    <RootNamespace>StringPatternMatching</RootNamespace>
+    <AssemblyName>StringPatternMatching</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helper\Helper.cs" />
+    <Compile Include="Helper\Utilities.cs" />
     <Compile Include="Models\Listing.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Program.cs" />
