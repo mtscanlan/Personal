@@ -34,28 +34,31 @@ namespace StringPatternMatching {
 				listing.KeyWordsString = Helper.TrimCharacters(listing.title);
 				Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
 			});
-			Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
+            Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
 
 			// Match listings to their respective products.
 			ConcurrentDictionary<string, ConcurrentBag<string>> unmatchedresults = new ConcurrentDictionary<string, ConcurrentBag<string>>();
 			Parallel.ForEach(Products, product => {
 				product.Value.MatchedListings = new ConcurrentBag<long>();
 				Parallel.ForEach(Listings, listing => {
-					if (UserDefinedFunctions.StringDistance(listing.Value.manufacturer, product.Value.manufacturer) >= 0.85) {
-						string trimmedProductModel = Helper.TrimCharacters(product.Value.model);
-						if (Helper.SlidingStringDistance(trimmedProductModel, listing.Value.KeyWordsString, 0.92)) {
-							// TODO: Need to filter based on price.
-							product.Value.MatchedListings.Add(listing.Key);
-						}
-					}
+                    string trimmedProductModel = Helper.TrimCharacters(product.Value.model);
+                    if (Helper.SlidingStringDistance(product.Value.manufacturer, listing.Value.manufacturer, 0.85) != -1 &&
+                        Helper.SlidingStringDistance(trimmedProductModel, listing.Value.KeyWordsString, 1.0) != -1) {
+                        // A lot of false positives here, M90 will match M900 for example. 
+                        product.Value.MatchedListings.Add(listing.Key);
+                    }
 				});
 			});
 			Console.WriteLine("Finished Matching Products : {0}s", sw.ElapsedMilliseconds / 1000f);
-
+            
 			// Populate the Results object from our matched listings in the Product object. 
-			Parallel.ForEach(Products, x => Results.Add(
-				new Result(x.Value.product_name, Listings.Where(l => x.Value.MatchedListings.Contains(l.Key)).Select(l => l.Value))
-			));
+			Parallel.ForEach(Products, x => {
+                var listings = Listings.Where(l => x.Value.MatchedListings.Contains(l.Key)).Select(l => l.Value);
+                // Filter based on price. +/- 50% of the median price.
+                double medianPrice = Helper.Percentile(listings.Select(p => Helper.ConvertForex(p.currency, Convert.ToDouble(p.price))));
+				Results.Add(new Result(x.Value.product_name, listings.Where(l => 
+                    Enumerable.Range((int)medianPrice / 2, (int)medianPrice).Contains((int)Helper.ConvertForex(l.currency, Convert.ToDouble(l.price))))));
+			});
 			Console.WriteLine("Populated Results : {0}s", sw.ElapsedMilliseconds / 1000f);
 
 

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -29,18 +30,59 @@ namespace StringPatternMatching {
 			Parallel.ForEach(text.Result, parallelAction);
 		}
 
-		public static bool SlidingStringDistance(string shortWord, string longWord, double threshold) {
-			bool foundCondition = false;
-			for (int i = 0; i < longWord.Length - shortWord.Length; i++) {
-				double score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(i, shortWord.Length));
-				foundCondition = score >= threshold;
-				if (foundCondition) break;
-			}
-			return foundCondition;
+		public static int SlidingStringDistance(string wordOne, string wordTwo, double threshold) {
+            if (wordOne == null || wordTwo == null) return -1;
+
+            Func<string, string, int> findMatchIndex = (shortWord, longWord) =>
+            {
+                bool foundCondition = false;
+                int index;
+                for (index = 0; index < longWord.Length - shortWord.Length; index++)
+                {
+                    double score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(index, shortWord.Length));
+                    foundCondition = score >= threshold;
+                    if (foundCondition) break;
+                }
+                if (!foundCondition) index = -1;
+                return index;
+            };
+
+            return wordOne.Length > wordTwo.Length ? findMatchIndex(wordTwo, wordOne) : findMatchIndex(wordOne, wordTwo);
 		}
 
 		public static string TrimCharacters(string words) {
 			return Regex.Replace(words, "[,_\\+\\- ]", "");
 		}
-	}
+
+        public static double Percentile(IEnumerable<double> sequence, double percentile = 0.5) {
+            SortedSet<double> sortedSequence = new SortedSet<double>(sequence);
+            int N = sortedSequence.Count;
+            if (N > 0) {
+                double n = (N - 1) * percentile + 1;
+                if (n == 1d) return sortedSequence.First();
+                else if (n == N) return sortedSequence.Last();
+                else {
+                    int k = (int)n;
+                    double d = n - k;
+                    return sortedSequence.ElementAt(k - 1) + d * (sortedSequence.ElementAt(k) - sortedSequence.ElementAt(k - 1));
+                }
+            }
+            else return 0;
+        }
+
+
+        internal static double ConvertForex(string p, double val) {
+            switch (p) {
+                case "CAD":
+                    return val * 0.8;
+                case "EUR":
+                    return val * 1.11;
+                case "GBP":
+                    return val * 1.53;
+                case "USD":
+                default:
+                    return val;
+            }
+        }
+    }
 }
