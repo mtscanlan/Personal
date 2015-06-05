@@ -20,7 +20,7 @@ namespace StringPatternMatching {
 		/// <param name="firstWord"></param>
 		/// <param name="secondWord"></param>
 		/// <returns>a value between 0-1 of the similarity</returns>
-		public static SqlDouble StringDistance(string firstWord, string secondWord) {
+		public static double StringDistance(string firstWord, string secondWord) {
 			if ((firstWord != null) && (secondWord != null)) {
 				if (firstWord == secondWord) {
 					return defaultMatchScore;

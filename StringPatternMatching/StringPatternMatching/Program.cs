@@ -21,6 +21,7 @@ namespace StringPatternMatching {
 			var sw = new Stopwatch();
 			sw.Start();
 
+			// Read from the files and populate the Products and Listings objects.
 			long increment = 0;
 			Helper.ReadFileAndPopulateData(@"products.txt", p => {
 				var product = JsonConvert.DeserializeObject<Product>(p);
@@ -33,55 +34,36 @@ namespace StringPatternMatching {
 				listing.KeyWordsString = Helper.TrimCharacters(listing.title);
 				Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
 			});
-			
-			sw.Stop();
 			Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
-			sw.Reset();
-			sw.Start();
 
-			// Match listings to their respective products
-			MatchListingsToProducts();
-
-			sw.Stop();
-			Console.WriteLine("Finished Matching Products : {0}s", sw.ElapsedMilliseconds / 1000f);
-			sw.Reset();
-			sw.Start();
-
-			// Populate the Results object from our matched listings in the Product object. 
-			PopulateResults();
-
-			sw.Stop();
-			Console.WriteLine("Populated Results : {0}s", sw.ElapsedMilliseconds / 1000f);
-			sw.Reset();
-			sw.Start();
-
-			// Print the results
-			Helper.PrintJson(@"results.txt", new List<Result>(Results));
-
-			sw.Stop();
-			Console.WriteLine("Ding! Results Complete : {0}s", sw.ElapsedMilliseconds / 1000f);
-			Console.ReadKey();
-		}
-
-		internal static void MatchListingsToProducts() {
+			// Match listings to their respective products.
 			ConcurrentDictionary<string, ConcurrentBag<string>> unmatchedresults = new ConcurrentDictionary<string, ConcurrentBag<string>>();
-			Parallel.ForEach(Products, p => {
-				p.Value.MatchedListings = new ConcurrentBag<long>();
-				Parallel.ForEach(Listings, l => {
-					if (UserDefinedFunctions.StringDistance(l.Value.manufacturer, p.Value.manufacturer) >= 0.85) {
-						string trimmedProductModel = Helper.TrimCharacters(p.Value.model);
-						if (Helper.SlidingStringDistance(trimmedProductModel, l.Value.KeyWordsString, 0.92)) {
-							p.Value.MatchedListings.Add(l.Key);
-						} 
-					} 
+			Parallel.ForEach(Products, product => {
+				product.Value.MatchedListings = new ConcurrentBag<long>();
+				Parallel.ForEach(Listings, listing => {
+					if (UserDefinedFunctions.StringDistance(listing.Value.manufacturer, product.Value.manufacturer) >= 0.85) {
+						string trimmedProductModel = Helper.TrimCharacters(product.Value.model);
+						if (Helper.SlidingStringDistance(trimmedProductModel, listing.Value.KeyWordsString, 0.92)) {
+							// TODO: Need to filter based on price.
+							product.Value.MatchedListings.Add(listing.Key);
+						}
+					}
 				});
 			});
-		}
+			Console.WriteLine("Finished Matching Products : {0}s", sw.ElapsedMilliseconds / 1000f);
 
-		internal static void PopulateResults() {
+			// Populate the Results object from our matched listings in the Product object. 
 			Parallel.ForEach(Products, x => Results.Add(
 				new Result(x.Value.product_name, Listings.Where(l => x.Value.MatchedListings.Contains(l.Key)).Select(l => l.Value))
 			));
+			Console.WriteLine("Populated Results : {0}s", sw.ElapsedMilliseconds / 1000f);
+
+
+			// Print the results.
+			Helper.PrintJson(@"results.txt", new List<Result>(Results));
+			sw.Stop();
+			Console.WriteLine("Ding! Results Complete : {0}s", sw.ElapsedMilliseconds / 1000f);
+			Console.ReadKey();
 		}
 	}
 }

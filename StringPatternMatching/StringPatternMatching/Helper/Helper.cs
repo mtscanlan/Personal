@@ -15,12 +15,12 @@ namespace StringPatternMatching {
 				writer.Write(JsonConvert.SerializeObject(jsonObject, Formatting.Indented));
 		}
 
-		private static async Task<IEnumerable<string>> ReadCharacters(string fn) {
+		private static async Task<IEnumerable<string>> ReadCharacters(string path) {
 			string line;
 			var lines = new List<string>();
-			using (var sr = new StreamReader(fn))
+			using (var sr = new StreamReader(path))
 				while ((line = await sr.ReadLineAsync()) != null)
-					lines.Add(line.Replace("announced-date", "announceddate"));
+					lines.Add(line);
 			return lines;
 		}
 

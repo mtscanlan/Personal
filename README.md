@@ -4,3 +4,4 @@
 ######Igloo Code kata - Weekly code challenges at Igloo Software.
 ######Interview Test Questions - Questions I was given during 2014, some incomplete.
 ######Practice Website - Code samples from online coding website from 2014 and ongoing, no linq.
+######String Pattern Matching
