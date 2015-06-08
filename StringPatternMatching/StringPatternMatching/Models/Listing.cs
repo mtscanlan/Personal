@@ -12,8 +12,12 @@ namespace StringPatternMatching {
 
 		[JsonIgnore]
 		public string KeyWordsString { get; set; }
+        [JsonIgnore]
+        public IEnumerable<string> Words { get; internal set; }
+        [JsonIgnore]
+        public bool HasParent { get; set; }
 
-		public override string ToString() {
+        public override string ToString() {
 			return JsonConvert.SerializeObject(this);
 		}
 	}

@@ -11,5 +11,6 @@ namespace StringPatternMatching {
 		public string family { get; set; }
 
 		public ConcurrentBag<long> MatchedListings { get; set; }
-	}
+        public HashSet<string> Words { get; internal set; }
+    }
 }

@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace StringPatternMatching {
 	public class Helper {
-
+        
         public static double ConvertForex(string p, double val) {
             switch (p) {
                 case "CAD":
@@ -25,20 +25,10 @@ namespace StringPatternMatching {
             }
         }
 
-        public static double Percentile(IEnumerable<double> sequence, double percentile = 0.5) {
+        public static double Median(IEnumerable<double> sequence, double percentile = 0.5) {
             SortedSet<double> sortedSequence = new SortedSet<double>(sequence);
             int N = sortedSequence.Count;
-            if (N > 0) {
-                double n = (N - 1) * percentile + 1;
-                if (n == 1d) return sortedSequence.First();
-                else if (n == N) return sortedSequence.Last();
-                else {
-                    int k = (int)n;
-                    double d = n - k;
-                    return sortedSequence.ElementAt(k - 1) + d * (sortedSequence.ElementAt(k) - sortedSequence.ElementAt(k - 1));
-                }
-            }
-            else return 0;
+            return N == 0 ? 0 : sortedSequence.ElementAt(N / 2);
         }
 
 		public static void PrintJson(string path, object jsonObject) {
@@ -60,7 +50,8 @@ namespace StringPatternMatching {
 			Parallel.ForEach(text.Result, parallelAction);
 		}
 
-		public static int SlidingStringDistance(string wordOne, string wordTwo, double threshold) {
+		public static int SlidingStringDistance(string wordOne, string wordTwo, double threshold)
+        {
             if (wordOne == null || wordTwo == null) return -1;
 
             Func<string, string, int> findMatchIndex = (shortWord, longWord) =>
@@ -78,10 +69,6 @@ namespace StringPatternMatching {
             };
 
             return wordOne.Length > wordTwo.Length ? findMatchIndex(wordTwo, wordOne) : findMatchIndex(wordOne, wordTwo);
-		}
-
-		public static string TrimCharacters(string words) {
-			return Regex.Replace(words, "[,_\\+\\- ]", "");
-		}
+        }
     }
 }

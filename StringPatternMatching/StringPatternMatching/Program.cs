@@ -21,17 +21,29 @@ namespace StringPatternMatching {
 			var sw = new Stopwatch();
 			sw.Start();
 
-			// Read from the files and populate the Products and Listings objects.
+			// Read from the files and populate the Products objects.
 			long increment = 0;
 			Helper.ReadFileAndPopulateData(@"products.txt", p => {
-				var product = JsonConvert.DeserializeObject<Product>(p);
-				Products.AddOrUpdate(Interlocked.Increment(ref increment), product, (k, v) => product);
+                // TODO: Split this up so it's more readable
+                var product = JsonConvert.DeserializeObject<Product>(p);
+                var keyWords = Regex.Replace(String.Join(" ", product.model, product.family, product.manufacturer, product.product_name), "[ ,_\\+\\-]", " ").Split(' ');
+                product.Words = new HashSet<string>(keyWords);
+                Products.AddOrUpdate(Interlocked.Increment(ref increment), product, (k, v) => product);
 			});
 
-			increment = 0;
+            // Create a "word cloud" of product key words.
+            var productWords = new HashSet<string>(Products.SelectMany(x => x.Value.Words));
+            for (char letter = 'a'; letter <= 'z'; letter++)
+                productWords.Add(letter.ToString());
+
+            // With the productWords "word cloud", read from the files and populate the Listings object.
+            increment = 0;
 			Helper.ReadFileAndPopulateData(@"listings.txt", l => {
+                // TODO: Split this up so it's more readable
 				var listing = JsonConvert.DeserializeObject<Listing>(l);
-				listing.KeyWordsString = Helper.TrimCharacters(listing.title);
+                var keyWords = Regex.Replace(String.Join(" ", listing.title, listing.manufacturer, listing.currency, listing.price), "[,_/\\\\(\\)\\+\\-]", " ").Split(' ');
+                listing.Words = keyWords.Intersect(productWords, StringComparer.OrdinalIgnoreCase);
+                listing.KeyWordsString = String.Join("", listing.Words);
 				Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
 			});
             Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
@@ -40,25 +52,36 @@ namespace StringPatternMatching {
 			ConcurrentDictionary<string, ConcurrentBag<string>> unmatchedresults = new ConcurrentDictionary<string, ConcurrentBag<string>>();
 			Parallel.ForEach(Products, product => {
 				product.Value.MatchedListings = new ConcurrentBag<long>();
-				Parallel.ForEach(Listings, listing => {
-                    if (UserDefinedFunctions.StringDistance(listing.Value.manufacturer, product.Value.manufacturer) >= 0.85) {
-                        string trimmedProductModel = Helper.TrimCharacters(product.Value.model);
-                        if (Helper.SlidingStringDistance(trimmedProductModel, listing.Value.KeyWordsString, 0.92) != -1) {
-                            product.Value.MatchedListings.Add(listing.Key);
+				Parallel.ForEach(Listings, listing =>
+                {
+                    if (!listing.Value.HasParent && !String.IsNullOrWhiteSpace(listing.Value.KeyWordsString)) {
+                        if (Helper.SlidingStringDistance(listing.Value.KeyWordsString, product.Value.manufacturer, 1.0) != -1) {
+                            string trimmedProductModel = Regex.Replace(product.Value.model, "[ ,_\\+\\-]", "");
+                            //int productModelInt = -1;
+                            if (Helper.SlidingStringDistance(listing.Value.KeyWordsString, trimmedProductModel, 1.0) != -1) {
+                                //if (!Int32.TryParse(product.Value.model, out productModelInt) ||
+                                //    (listing.Value.Words.Contains(product.Value.model) &&
+                                //    listing.Value.Words.Contains(product.Value.family))) {
+                                //    listing.Value.HasParent = true;
+                                    product.Value.MatchedListings.Add(listing.Key);
+                                //}
+                            }
                         }
                     }
 				});
 			});
 			Console.WriteLine("Finished Matching Products : {0}s", sw.ElapsedMilliseconds / 1000f);
-            
-			// Populate the Results object from our matched listings in the Product object. 
-			Parallel.ForEach(Products, x => {
-                var listings = Listings.Where(l => x.Value.MatchedListings.Contains(l.Key)).Select(l => l.Value);
+
+            // Populate the Results object from our matched listings in the Product object. 
+            Parallel.ForEach(Products, p => {
+                var distinctListings = p.Value.MatchedListings.Distinct();
+                var listings = Listings.Where(l => distinctListings.Contains(l.Key)).Select(l => l.Value);
                 // Filter based on price. +/- 50% of the median price.
-                double medianPrice = Helper.Percentile(listings.Select(p => Helper.ConvertForex(p.currency, Convert.ToDouble(p.price))));
-				Results.Add(new Result(x.Value.product_name, listings.Where(l => 
-                    Enumerable.Range((int)medianPrice / 2, (int)medianPrice).Contains((int)Helper.ConvertForex(l.currency, Convert.ToDouble(l.price))))));
-			});
+                double medianPrice = Helper.Median(listings.Select(l => Helper.ConvertForex(l.currency, Convert.ToDouble(l.price))));
+                IEnumerable<int> medianRange = Enumerable.Range((int)medianPrice / 2, (int)medianPrice);
+                Results.Add(new Result(p.Value.product_name, listings.Where(l =>
+                    medianRange.Contains((int)Helper.ConvertForex(l.currency, Convert.ToDouble(l.price))))));
+            });
 			Console.WriteLine("Populated Results : {0}s", sw.ElapsedMilliseconds / 1000f);
 
 
