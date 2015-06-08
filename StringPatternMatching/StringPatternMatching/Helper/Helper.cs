@@ -53,16 +53,21 @@ namespace StringPatternMatching {
 		public static int SlidingStringDistance(string wordOne, string wordTwo, double threshold)
         {
             if (wordOne == null || wordTwo == null) return -1;
+            if (wordOne.Length == wordTwo.Length) {
+                double stringDistance = UserDefinedFunctions.StringDistance(wordOne, wordTwo);
+                return stringDistance >= threshold ? 0 : -1;
+            }
 
             Func<string, string, int> findMatchIndex = (shortWord, longWord) =>
             {
+                shortWord = shortWord.ToLower();
+                longWord = longWord.ToLower();
                 bool foundCondition = false;
                 int index;
-                for (index = 0; index < longWord.Length - shortWord.Length; index++)
+                for (index = 0; !foundCondition && index <= longWord.Length - shortWord.Length; index++)
                 {
                     double score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(index, shortWord.Length));
                     foundCondition = score >= threshold;
-                    if (foundCondition) break;
                 }
                 if (!foundCondition) index = -1;
                 return index;

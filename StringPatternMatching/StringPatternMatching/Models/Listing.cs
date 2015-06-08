@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
 
 namespace StringPatternMatching {
 	public class Listing {
@@ -11,14 +12,15 @@ namespace StringPatternMatching {
 		public string price { get; set; }
 
 		[JsonIgnore]
-		public string KeyWordsString { get; set; }
+        public string KeyWordsString { get; set; }
         [JsonIgnore]
         public IEnumerable<string> Words { get; internal set; }
         [JsonIgnore]
-        public bool HasParent { get; set; }
+        public bool HasParent { get; internal set; }
 
         public override string ToString() {
 			return JsonConvert.SerializeObject(this);
 		}
-	}
+
+    }
 }
