@@ -28,7 +28,7 @@ namespace StringPatternMatching {
                 var product = JsonConvert.DeserializeObject<Product>(p);
                 Regex regexReplace = new Regex("[ ,_\\+\\-]");
 
-                var keyWords = Regex.Replace(String.Join(" ", product.model, product.family, product.manufacturer, product.product_name), "[ ,_\\+\\-]", " ").Split(' '); 
+                var keyWords = Regex.Replace(String.Join(" ", product.family, product.manufacturer), "[ ,_\\+\\-]", " ").Split(' '); 
                 var productFamily = product.family == null ? "" : regexReplace.Replace(product.family, "");
                 var productMfg = product.manufacturer == null ? "" : regexReplace.Replace(product.manufacturer, "");
                 var productName = product.product_name == null ? "" : regexReplace.Replace(product.product_name, "");
@@ -45,26 +45,25 @@ namespace StringPatternMatching {
             });
 
             // Create a "word cloud" of product key words.
+            var allExcludeWords = new HashSet<string>(Products.SelectMany(x => x.Value.ExceptWords));
             var allIncludeWords = new HashSet<string>(Products.SelectMany(x => x.Value.IncludeWords));
             for (char letter = 'a'; letter <= 'z'; letter++)
                 allIncludeWords.Add(letter.ToString());
             allIncludeWords.Remove("");
+            allIncludeWords.Remove("Zoom");
 
-            var allExcludeWords = new HashSet<string>(Products.SelectMany(x => x.Value.ExceptWords));
 
             // With the productWords "word cloud", read from the files and populate the Listings object.
             increment = 0;
 			Helper.ReadFileAndPopulateData(@"listings.txt", l => {
 				var listing = JsonConvert.DeserializeObject<Listing>(l);
 
-                IEnumerable<string> keyWords = Regex.Replace(listing.title, "[*,_/\\\\(\\)\\+\\-]", " ").Split(' ');
-                if (String.IsNullOrEmpty(listing.manufacturer)) 
+                IEnumerable<string> keyWords = Regex.Replace(listing.title, "[*.,_/\\\\(\\)\\+\\-]", " ").Split(' ');
+                if (String.IsNullOrEmpty(listing.manufacturer))
                     listing.manufacturer = keyWords.First();
-                keyWords = keyWords.Intersect(allIncludeWords, StringComparer.OrdinalIgnoreCase).Except(allExcludeWords);
-                listing.KeyWordsString = String.Join("", keyWords);
+                keyWords = keyWords.Intersect(allIncludeWords, StringComparer.OrdinalIgnoreCase);
+                listing.KeyWordsString = listing.manufacturer + String.Join("", keyWords);
                 listing.Words = keyWords;
-
-
 				Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
 			});
             Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
@@ -75,9 +74,10 @@ namespace StringPatternMatching {
 				product.Value.MatchedListings = new ConcurrentBag<long>();
                 IEnumerable<KeyValuePair<long, Listing>> listingsWithKeyWords = Listings.Where(l => !String.IsNullOrWhiteSpace(l.Value.KeyWordsString));
                 Parallel.ForEach(listingsWithKeyWords, listing => {
-                    if (Helper.SlidingStringDistance(listing.Value.manufacturer, product.Value.manufacturer, 1.0) != -1) {
-                        bool possibleSubstring = product.Value.TrimmedProductModel.Length <= listing.Value.KeyWordsString.Length;
-                        if (possibleSubstring && Helper.SlidingStringDistance(listing.Value.KeyWordsString, product.Value.TrimmedProductModel, 1.0) != -1) {
+                    if (Helper.SlidingStringDistance(listing.Value.manufacturer, product.Value.manufacturer, 0.85) != -1) {
+                        var keyWords = String.Join("", listing.Value.Words.Except(allExcludeWords, StringComparer.OrdinalIgnoreCase));
+                        bool possibleSubstring = product.Value.TrimmedProductModel.Length <= keyWords.Length;
+                        if (possibleSubstring && Helper.SlidingStringDistance(keyWords, product.Value.TrimmedProductModel, 1.0) != -1) {
                             if (!product.Value.ProductModelIsInt || listing.Value.Words.Contains(product.Value.model)) {
                                 listing.Value.HasParent = true;
                                 product.Value.MatchedListings.Add(listing.Key);
