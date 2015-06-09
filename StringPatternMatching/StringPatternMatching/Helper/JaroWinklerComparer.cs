@@ -18,7 +18,7 @@ namespace StringPatternMatching
 
         public bool Equals(string x, string y)
         {
-            return Helper.SlidingStringDistance(x, y, Threshold) != -1;
+            return UserDefinedFunctions.StringDistance(x, y) >= Threshold;
         }
 
         public int GetHashCode(string obj)

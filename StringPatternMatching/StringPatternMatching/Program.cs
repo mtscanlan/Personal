@@ -45,30 +45,30 @@ namespace StringPatternMatching {
 			});
 
 			// Create a "word cloud" of product key words.
-			var allIncludeWords = new HashSet<string>(Products.SelectMany(x => x.Value.IncludeWords));
-			for (char letter = 'a'; letter <= 'z'; letter++)
-				allIncludeWords.Add(letter.ToString());
-			allIncludeWords.Remove("");
-
-			//Exclude single numbers
 			var numberRange = new List<string>() { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+            var allIncludeWords = new HashSet<string>(Products.SelectMany(x => x.Value.IncludeWords));
+            allIncludeWords.Remove("");
 
-			// With the productWords "word cloud", read from the files and populate the Listings object.
-			increment = 0;
-			Helper.ReadFileAndPopulateData(@"listings.txt", l => {
-				var listing = JsonConvert.DeserializeObject<Listing>(l);
+            // With the productWords "word cloud", read from the files and populate the Listings object.
+            increment = 0;
+            Helper.ReadFileAndPopulateData(@"listings.txt", l =>
+            {
+                var listing = JsonConvert.DeserializeObject<Listing>(l);
 
-				IEnumerable<string> keyWords = Regex.Replace(listing.title, REGEX_REPLACE_PATTERN, " ").ToLower().Split(' ');
-				if (String.IsNullOrEmpty(listing.manufacturer)) {
-					listing.manufacturer = keyWords.First();
-				}
+                IEnumerable<string> keyWords = Regex.Replace(listing.title, REGEX_REPLACE_PATTERN, " ").ToLower().Split(' ');
+                if (String.IsNullOrEmpty(listing.manufacturer))
+                {
+                    listing.manufacturer = keyWords.First();
+                }
 
-				//Use the "word clouds" to exclude and filter unused words
-				keyWords = keyWords.Except(numberRange);
-				listing.Words = keyWords.Intersect(allIncludeWords, new JaroWinklerComparer(0.7)).ToArray();
+                //Exclude single numbers
+                keyWords.Except(numberRange);
+
+                //Use the "word clouds" to filter unused words
+                listing.Words = keyWords.Intersect(allIncludeWords, new JaroWinklerComparer(0.5)).ToArray();
                 Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
-			});
-			Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
+            });
+            Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
 
 			// Match listings to their respective products.
 			Parallel.ForEach(Products, product => {
