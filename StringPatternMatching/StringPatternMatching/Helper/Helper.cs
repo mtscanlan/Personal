@@ -31,9 +31,10 @@ namespace StringPatternMatching {
             return N == 0 ? 0 : sortedSequence.ElementAt(N / 2);
         }
 
-		public static void PrintJson(string path, object jsonObject) {
-			using (TextWriter writer = new StreamWriter(path))
-				writer.Write(JsonConvert.SerializeObject(jsonObject, Formatting.Indented));
+		public static void PrintJson(string path, IEnumerable<object> jsonObject) {
+			using (TextWriter writer = new StreamWriter(path)) {
+				jsonObject.ForEach(j => writer.WriteLine(JsonConvert.SerializeObject(j, Formatting.None)));
+			}
 		}
 
 		private static async Task<IEnumerable<string>> ReadCharacters(string path) {
