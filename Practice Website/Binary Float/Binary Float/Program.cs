@@ -14,27 +14,26 @@ namespace Binary_Float
 		*/
 
 		public static void print_float(string s) // My way, faster. Less terse obviously.
-		{
-			string[] parts = s.Split('.');
-			double total = 0;
-			char[] integerPart = parts[0].ToCharArray(), fractionPart = parts[1].ToCharArray();
+        {
+            string[] parts = s.Split('.');
+            double total = 0;
+            string integerPart = parts[0], fractionPart = parts[1];
 
-			int integerPartLength = parts[0].Length;
-            int multiple = 2 << integerPartLength - 1;
-			for (int i = 0; i < integerPartLength; i++)
-			{
-				multiple = multiple >> 1;
-				int x = integerPart[i] - '0'; // assumption that integerPart will be numeric
-				total += x * multiple;
-			}
-
-			int fractionPartLength = parts[1].Length;
-			for (int i = 0; i < fractionPartLength; i++)
+            int multiple = 1 << integerPart.Length;
+            foreach (char c in integerPart)
             {
-                multiple = multiple << 1;
-				int x = fractionPart[i] - '0'; // assumption that integerPart will be numeric
-				total += (double)x / multiple;
-			}
+                multiple = multiple >> 1;
+                if (c == '1')
+                    total += 1.0 * multiple;
+            }
+
+            double fraction = 1.0;
+            foreach (char c in fractionPart)
+            {
+                fraction /= 2.0;
+                if (c == '1')
+                    total += fraction;
+            }
 			Console.WriteLine("{0}", total);
 		}
 
