@@ -49,9 +49,6 @@ namespace StringPatternMatching {
 			for (char letter = 'a'; letter <= 'z'; letter++)
 				allIncludeWords.Add(letter.ToString());
 			allIncludeWords.Remove("");
-			allIncludeWords.Remove("wide");
-			allIncludeWords.Remove("zoom");
-			allIncludeWords.Remove("digital");
 
 			//Exclude single numbers
 			var numberRange = new List<string>() { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
@@ -68,9 +65,9 @@ namespace StringPatternMatching {
 
 				//Use the "word clouds" to exclude and filter unused words
 				keyWords = keyWords.Except(numberRange);
-				listing.Words = keyWords.Intersect(allIncludeWords, StringComparer.OrdinalIgnoreCase).ToArray();
-
-				Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
+				listing.Words = keyWords.Intersect(allIncludeWords, new JaroWinklerComparer(0.7)).ToArray();
+                if (listing.title == "Fujifilm Finepix F70 EXR Digitalkamera (10 Megapixel, 10-fach opt. Zoom, 6,9 cm (2,7 Zoll) Display, Bildstabilisator) Graphit")
+                Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
 			});
 			Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
 
@@ -81,30 +78,27 @@ namespace StringPatternMatching {
 				Parallel.ForEach(Listings, listing => {
 					var manufacturerKeywords = listing.Value.manufacturer.ToLower().Split(' ');
 
-					if (!listing.Value.HasParent && manufacturerKeywords.Intersect(listing.Value.Words).Count() > 0) {
+					if (manufacturerKeywords.Intersect(listing.Value.Words).Count() > 0) {
 						string listingString = String.Join("", listing.Value.Words);
 						bool isPossibleSubstring = listingString.Length >= product.Value.FormattedManufacturer.Length;
 
-						if (isPossibleSubstring && Helper.SlidingStringDistance(listingString, product.Value.FormattedManufacturer, 1.0) != -1) {
+						if (isPossibleSubstring && Helper.SlidingStringDistance(listingString, product.Value.FormattedManufacturer, 0.85) != -1) {
 							listingString = listingString.Replace(product.Value.FormattedManufacturer, "");
 							isPossibleSubstring = listingString.Length >= product.Value.FormattedFamily.Length;
 
 							if (isPossibleSubstring && !String.IsNullOrEmpty(product.Value.FormattedFamily)) {
-								if (Helper.SlidingStringDistance(listingString, product.Value.FormattedFamily, 1.0) != -1) {
-									listingString = listingString.Replace(product.Value.FormattedFamily, "");
-									isPossibleSubstring = listingString.Length >= product.Value.FormattedModel.Length;
+								if (Helper.SlidingStringDistance(listingString, product.Value.FormattedFamily, 0.85) != -1) {
+                                    listingString = listingString.Replace(product.Value.FormattedFamily, "");
+                                    isPossibleSubstring = listingString.Length >= product.Value.FormattedModel.Length;
 
-									if (isPossibleSubstring && Helper.SlidingStringDistance(listingString, product.Value.FormattedModel, 1.0) != -1) {
+                                    if (isPossibleSubstring && Helper.SlidingStringDistance(listingString, product.Value.FormattedModel, 0.85) != -1) {
 										listing.Value.HasParent = true;
 										product.Value.MatchedListings.Add(listing.Key);
 									}
 								}
-							} else {
-								isPossibleSubstring = listingString.Length > product.Value.FormattedModel.Length;
-
-								if (isPossibleSubstring && Helper.SlidingStringDistance(listingString, product.Value.FormattedModel, 1.0) != -1) {
+                            }
+                            else if (Helper.SlidingStringDistance(listingString, product.Value.FormattedModel, 0.85) != -1) {
 									product.Value.MatchedListings.Add(listing.Key);
-								}
 							}
 						}
 					}
