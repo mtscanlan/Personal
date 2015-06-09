@@ -10,11 +10,11 @@ namespace StringPatternMatching {
 		public string manufacturer { get; set; }
 		public string currency { get; set; }
 		public string price { get; set; }
-
-		[JsonIgnore]
-        public string KeyWordsString { get; set; }
+        
         [JsonIgnore]
-        public IEnumerable<string> Words { get; internal set; }
+        public string[] Words { get; internal set; }
+
+        // testing
         [JsonIgnore]
         public bool HasParent { get; internal set; }
 
