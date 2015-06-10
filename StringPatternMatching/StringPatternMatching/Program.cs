@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -27,109 +25,91 @@ namespace StringPatternMatching {
 			long increment = 0;
 			Helper.ReadFileAndPopulateData(@"products.txt", p => {
 				var product = JsonConvert.DeserializeObject<Product>(p);
-				Regex regexReplace = new Regex(REGEX_REPLACE_PATTERN);
 				Regex regexReplaceWithSpace = new Regex(REGEX_REPLACE_PATTERN_SPACE);
 
-				product.FormattedFamily = product.family == null ? "" : regexReplace.Replace(product.family, "").ToLower();
-				product.FormattedManufacturer = product.manufacturer == null ? "" : regexReplace.Replace(product.manufacturer, "").ToLower();
-				// with space
+				product.FormattedFamily = product.family == null ? "" : regexReplaceWithSpace.Replace(product.family, "").ToLower();
+				product.FormattedManufacturer = product.manufacturer == null ? "" : regexReplaceWithSpace.Replace(product.manufacturer, "").ToLower();
 				product.FormattedModel = product.model == null ? "" : regexReplaceWithSpace.Replace(product.model, "").ToLower();
-				// to space
-				product.FormattedName = product.product_name == null ? "" : regexReplace.Replace(product.product_name, " ").ToLower();
-
-				//This will be used later for our word cloud.
-				string productWords = String.Join(" ", product.FormattedFamily, product.FormattedManufacturer, product.FormattedModel, product.FormattedName);
-				product.IncludeWords = new HashSet<string>(productWords.ToLower().Split(' '));
 
 				Products.AddOrUpdate(Interlocked.Increment(ref increment), product, (k, v) => product);
 			});
 
-			// Create a "word cloud" of product key words.
-			var numberRange = new List<string>() { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-            var allIncludeWords = new HashSet<string>(Products.SelectMany(x => x.Value.IncludeWords));
-            allIncludeWords.Remove("");
+			// Create a "word cloud" of manufacturers, this will be used to filter some listings.
+			var wordCloudFormattedManufacturer = new HashSet<string>(Products.Values.Select(p => p.FormattedManufacturer));
 
-            // With the productWords "word cloud", read from the files and populate the Listings object.
-            increment = 0;
-            Helper.ReadFileAndPopulateData(@"listings.txt", l =>
-            {
-                var listing = JsonConvert.DeserializeObject<Listing>(l);
+			// With the FormattedName "word cloud", read from the files and populate the Listings object.
+			increment = 0;
+			JaroWinklerComparer jaroComparer = new JaroWinklerComparer(1.0);
+			Helper.ReadFileAndPopulateData(@"listings.txt", l => {
+				var listing = JsonConvert.DeserializeObject<Listing>(l);
+				var title = listing.title.ToLower();
+				Regex regexReplace = new Regex(REGEX_REPLACE_PATTERN);
+				Regex regexReplaceWithSpace = new Regex(REGEX_REPLACE_PATTERN_SPACE);
 
-                IEnumerable<string> keyWords = Regex.Replace(listing.title, REGEX_REPLACE_PATTERN, " ").ToLower().Split(' ');
-                if (String.IsNullOrEmpty(listing.manufacturer))
-                {
-                    listing.manufacturer = keyWords.First();
-                }
+				listing.FormattedTitle = regexReplaceWithSpace.Replace(title, "");
+				listing.KeyWords = new HashSet<string>(regexReplace.Replace(title, " ").Split(' '));
+				var manufacturerKeyWords = regexReplace.Replace(listing.manufacturer.ToLower(), " ").Split(' ');
+                listing.FormattedManufacturerKeyWords =
+					manufacturerKeyWords.Intersect(wordCloudFormattedManufacturer, jaroComparer).ToArray();
 
-                //Exclude single numbers
-                keyWords.Except(numberRange);
-
-                //Use the "word clouds" to filter unused words
-                listing.Words = keyWords.Intersect(allIncludeWords, new JaroWinklerComparer(0.5)).ToArray();
-                Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
-            });
-            Console.WriteLine("Finished Reading Files : {0}s", sw.ElapsedMilliseconds / 1000f);
+				if (listing.FormattedManufacturerKeyWords.Count() > 0 &&
+					wordCloudFormattedManufacturer.Contains(listing.FormattedManufacturerKeyWords.First()) &&
+					listing.KeyWords.Intersect(wordCloudFormattedManufacturer).Count() > 0) {
+					Listings.AddOrUpdate(Interlocked.Increment(ref increment), listing, (k, v) => listing);
+				} 
+			});
+			Console.WriteLine("Finished reading files and populating data : {0}s", sw.ElapsedMilliseconds / 1000f);
 
 			// Match listings to their respective products.
-			Parallel.ForEach(Products, product => {
-				product.Value.MatchedListings = new ConcurrentBag<long>();
-
+			var maxFormattedNameLength = Products.Max(p => p.Value.product_name.Length);
+			Parallel.ForEach(Products.Values, product => {
+				product.MatchedListings = new ConcurrentBag<long>();
 				Parallel.ForEach(Listings, listing => {
-					var manufacturerKeywords = listing.Value.manufacturer.ToLower().Split(' ');
+					string matchingString = Helper.ExtractMatchingString(
+						product.FormattedManufacturer,
+						listing.Value,
+						maxFormattedNameLength);
 
-					if (manufacturerKeywords.Intersect(listing.Value.Words).Count() > 0) {
-						string listingString = String.Join("", listing.Value.Words);
-						bool isPossibleSubstring = listingString.Length >= product.Value.FormattedManufacturer.Length;
-
-						if (isPossibleSubstring && Helper.SlidingStringDistance(listingString, product.Value.FormattedManufacturer, 1.0) != -1) {
-							listingString = listingString.Replace(product.Value.FormattedManufacturer, "");
-							isPossibleSubstring = listingString.Length >= product.Value.FormattedFamily.Length;
-
-							if (isPossibleSubstring && !String.IsNullOrEmpty(product.Value.FormattedFamily)) {
-								if (Helper.SlidingStringDistance(listingString, product.Value.FormattedFamily, 1.0) != -1) {
-                                    listingString = listingString.Replace(product.Value.FormattedFamily, "");
-                                    isPossibleSubstring = listingString.Length >= product.Value.FormattedModel.Length;
-
-                                    if (isPossibleSubstring && Helper.SlidingStringDistance(listingString, product.Value.FormattedModel, 1.0) != -1) {
-										listing.Value.HasParent = true;
-										product.Value.MatchedListings.Add(listing.Key);
-									}
-								}
-                            }
-                            else if (Helper.SlidingStringDistance(listingString, product.Value.FormattedModel, 1.0) != -1) {
-									product.Value.MatchedListings.Add(listing.Key);
-							}
+					if (!String.IsNullOrEmpty(matchingString)) {
+						if (Helper.SlidingStringDistance(product.FormattedModel, matchingString, 1.0) != -1) {
+							listing.Value.Flag = true;
+							product.MatchedListings.Add(listing.Key);
 						}
 					}
 				});
 			});
-			Console.WriteLine("Finished Matching Products : {0}s", sw.ElapsedMilliseconds / 1000f);
+			Console.WriteLine("Finished matching products : {0}s", sw.ElapsedMilliseconds / 1000f);
 
 			// Populate the Results object from our matched listings in the Product object. 
 			Parallel.ForEach(Products, p => {
 				// Get the collection of all listings matched to this product.
 				var distinctListingKeys = p.Value.MatchedListings.Distinct();
 				var listings = Listings.Where(l => distinctListingKeys.Contains(l.Key)).Select(l => l.Value);
-
-				// Filter based on price. +/- 50% of the median price.
-				double medianPrice = Helper.Median(listings.Select(l => Helper.ConvertForex(l.currency, Convert.ToDouble(l.price))));
-				IEnumerable<int> medianRange = Enumerable.Range((int)(medianPrice * 4) / 3, (int)medianPrice / 2);
-
 				// Add the result to the Results collection.
-				Results.Add(new Result(p.Value.product_name, listings.Where(l =>
-					medianRange.Contains((int)Helper.ConvertForex(l.currency, Convert.ToDouble(l.price))))));
+				Results.Add(new Result(p.Value.product_name, listings));
 			});
-			Console.WriteLine("Populated Results : {0}s", sw.ElapsedMilliseconds / 1000f);
-			
+			Console.WriteLine("Populated results : {0}s", sw.ElapsedMilliseconds / 1000f);
+
 			// Print the results, need to convert this to a List due to issues with serializing a ConcurrentBag.
-			Helper.PrintJson(@"results.txt", new List<Result>(Results));
+			Helper.PrintJson(@"results.txt", new List<Result>(Results), Formatting.Indented);
 
 			// testing
-			Helper.PrintJson(@"rejects.txt", new HashSet<Listing>(Listings.Where(l => !l.Value.HasParent).Select(l => l.Value)));
+			Helper.PrintJson(@"rejects.txt", new List<Listing>(Listings.Where(l => !l.Value.Flag).Select(l => l.Value)), Formatting.None);
 
 			sw.Stop();
-			Console.WriteLine("Ding! Results Complete : {0}s", sw.ElapsedMilliseconds / 1000f);
+			Console.WriteLine("Ding! Results complete : {0}s", sw.ElapsedMilliseconds / 1000f);
 			Console.ReadKey();
 		}
 	}
 }
+
+/*  TODO :   
+"product_name": "Nikon_Coolpix_600",
+  "listings": [
+    {
+      "manufacturer": "Nikon",
+      "title": "Nikon Coolpix 7600 Digitalkamera (7 Megapixel) in schwarz",
+      "currency": "EUR",
+      "price": "100.95"
+    },
+*/

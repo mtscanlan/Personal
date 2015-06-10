@@ -1,39 +1,16 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace StringPatternMatching {
 	public class Helper {
-        
-        public static double ConvertForex(string p, double val) {
-            switch (p) {
-                case "CAD":
-                    return val * 0.8;
-                case "EUR":
-                    return val * 1.11;
-                case "GBP":
-                    return val * 1.53;
-                case "USD":
-                default:
-                    return val;
-            }
-        }
 
-        public static double Median(IEnumerable<double> sequence, double percentile = 0.5) {
-            SortedSet<double> sortedSequence = new SortedSet<double>(sequence);
-            int N = sortedSequence.Count;
-            return N == 0 ? 0 : sortedSequence.ElementAt(N / 2);
-        }
-
-		public static void PrintJson(string path, IEnumerable<object> jsonObject) {
+		public static void PrintJson(string path, IEnumerable<object> jsonObject, Formatting formatting) {
 			using (TextWriter writer = new StreamWriter(path)) {
-				jsonObject.ForEach(j => writer.WriteLine(JsonConvert.SerializeObject(j, Formatting.None)));
+				jsonObject.ForEach(j => writer.WriteLine(JsonConvert.SerializeObject(j, formatting)));
 			}
 		}
 
@@ -51,31 +28,38 @@ namespace StringPatternMatching {
 			Parallel.ForEach(text.Result, parallelAction);
 		}
 
-		public static int SlidingStringDistance(string wordOne, string wordTwo, double threshold)
-        {
-            if (wordOne == null || wordTwo == null) return -1;
-            if (wordOne.Length == wordTwo.Length) {
-                double stringDistance = UserDefinedFunctions.StringDistance(wordOne, wordTwo);
-                return stringDistance >= threshold ? 0 : -1;
-            }
+		public static int SlidingStringDistance(string wordOne, string wordTwo, double threshold) {
+			if (wordOne == null || wordTwo == null) return -1;
 
-            Func<string, string, int> findMatchIndex = (shortWord, longWord) =>
-            {
-                shortWord = shortWord.ToLower();
-                longWord = longWord.ToLower();
-                bool foundCondition = false;
-                int index;
-                for (index = 0; index < longWord.Length - shortWord.Length; index++)
-                {
-                    double score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(index, shortWord.Length));
-                    foundCondition = score >= threshold;
-                    if (foundCondition) break;
-                }
-                if (!foundCondition) index = -1;
-                return index;
-            };
+			wordOne = wordOne.ToLower();
+			wordTwo = wordTwo.ToLower();
 
-            return wordOne.Length > wordTwo.Length ? findMatchIndex(wordTwo, wordOne) : findMatchIndex(wordOne, wordTwo);
-        }
-    }
+			if (wordOne.Length == wordTwo.Length) {
+				double stringDistance = UserDefinedFunctions.StringDistance(wordOne, wordTwo);
+				return stringDistance >= threshold ? 0 : -1;
+			}
+
+			Func<string, string, int> findMatchIndex = (shortWord, longWord) => {
+				bool foundCondition = false;
+				int index;
+				for (index = 0; index < longWord.Length - shortWord.Length; index++) {
+					double score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(index, shortWord.Length));
+					foundCondition = score >= threshold;
+					if (foundCondition) break;
+				}
+				if (!foundCondition) index = -1;
+				return index;
+			};
+
+			return wordOne.Length > wordTwo.Length ? findMatchIndex(wordTwo, wordOne) : findMatchIndex(wordOne, wordTwo);
+		}
+		public static string ExtractMatchingString(string formattedManufacturer, Listing listing, int maxFormattedNameLength) {
+
+			if (listing.manufacturer.Any() && listing.FormattedManufacturerKeyWords.First() == formattedManufacturer) {
+				string formattedTitle = String.Join("", listing.KeyWords);
+				int indexOfManufacturer = formattedTitle.IndexOf(listing.FormattedManufacturerKeyWords.First());
+				return indexOfManufacturer == -1 ? string.Empty : formattedTitle.Substring(indexOfManufacturer, Math.Min(formattedTitle.Length - indexOfManufacturer, maxFormattedNameLength));
+			} else return String.Empty;
+		}
+	}
 }
