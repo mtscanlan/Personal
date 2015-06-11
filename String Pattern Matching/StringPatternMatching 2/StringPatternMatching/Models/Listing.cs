@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace StringPatternMatching {
 	public class Listing {
@@ -9,17 +8,18 @@ namespace StringPatternMatching {
 		public string currency { get; set; }
 		public string price { get; set; }
 
-		[JsonIgnore]
-		public string FormattedTitle { get; internal set; }
-		[JsonIgnore]
-		public string[] FormattedManufacturerKeyWords { get; internal set; }
-		[JsonIgnore]
-		public HashSet<string> KeyWords { get; internal set; }
+        [JsonIgnore]
+        public bool Flag { get; set; }
 
-		// testing
-		[JsonIgnore]
-		public bool Flag { get; internal set; }
+        public Listing() { }
 
+        public Listing(Listing listing) {
+            manufacturer = listing.manufacturer;
+            title = listing.title;
+            currency = listing.currency;
+            price = listing.price;
+        }
+        
 		public override string ToString() {
 			return JsonConvert.SerializeObject(this);
 		}
