@@ -16,7 +16,7 @@ namespace StringPatternMatching {
         private const string REGEX_REPLACE_PATTERN_NOSPACE = "[*\\.,_/\\\\(\\)\\+\\-]";
         private static readonly ConcurrentBag<Result> Results = new ConcurrentBag<Result>();
         private static readonly ConcurrentBag<Product> Products = new ConcurrentBag<Product>();
-        private static readonly ConcurrentBag<CustomListing> Listings = new ConcurrentBag<CustomListing>();
+        private static readonly ConcurrentDictionary<string, CustomListing> Listings = new ConcurrentDictionary<string, CustomListing>();
 
         private static void Main(string[] args) {
             var uri = new Uri("http://localhost:9200");
@@ -46,7 +46,7 @@ namespace StringPatternMatching {
             Helper.ReadFileAndPopulateData(@"listings.txt", l => {
                 CustomListing listing = JsonConvert.DeserializeObject<CustomListing>(l);
                 if (!String.IsNullOrWhiteSpace(listing.title)) {
-                    listing.FormattedTitle = regexReplaceNoSpace.Replace(listing.title, " ").ToLower();
+                    listing.FormattedTitle = regexReplaceNoSpace.Replace(listing.title, "").ToLower();
                     var keyWords = listing.FormattedTitle.Split(' ').Distinct();
                     var manufacturerKeyWords = regexReplace.Replace(listing.manufacturer.ToLower(), " ").Split(' ');
                     var formattedManufacturerKeyWords = manufacturerKeyWords.Intersect(wordCloudFormattedManufacturer, jaroComparer).ToArray();
@@ -56,7 +56,7 @@ namespace StringPatternMatching {
                         keyWords.Intersect(wordCloudFormattedManufacturer).Count() > 0)
                     {
                         listing.Id = Interlocked.Increment(ref id).ToString();
-                        Listings.Add(listing);
+                        Listings.AddOrUpdate(listing.Id, listing, (k,v) => listing);
                         client.Index(listing);
                     }
                 }
@@ -64,16 +64,24 @@ namespace StringPatternMatching {
             Console.WriteLine("Finished reading files and populating data : {0}s", sw.ElapsedMilliseconds / 1000f);
 
 			// Match listings to their respective products.
-            var allFormattedmanufacturers = Products.Select(p => p.FormattedManufacturer).Distinct();
 			Parallel.ForEach(Products, product => {
-                product.MatchedListings = new ConcurrentBag<Listing>();
-                ISearchResponse<CustomListing> matchedListings = client.Search<CustomListing>(s =>
-                    s.Take(Listings.Count).Query(q => 
-                        q.Match(m => m.Query(product.FormattedManufacturer).OnField(f => f.FormattedTitle)) &&
-                        q.Match(m => m.Lenient(true).Query(product.FormattedModel).OnField(f => f.FormattedTitle))
-                    ));
+				product.MatchedListings = new ConcurrentBag<Listing>();
+				ISearchResponse<CustomListing> matchedListings = client.Search<CustomListing>(s =>
+					s.Take(Listings.Count).Query(q => {
+						if (!String.IsNullOrEmpty(product.FormattedFamily)) {
+							return q.Match(m => m.Query(product.FormattedManufacturer).OnField(f => f.FormattedTitle)) &&
+                            q.Match(m => m.Query(product.FormattedFamily).OnField(f => f.FormattedTitle)) &&
+							q.Match(m => m.Query(product.FormattedModel).OnField(f => f.FormattedTitle));
+						} else {
+							return q.Match(m => m.Query(product.FormattedManufacturer).OnField(f => f.FormattedTitle)) &&
+							q.Match(m => m.Query(product.FormattedModel).OnField(f => f.FormattedTitle));
+                        }
+                    }));
 
-                matchedListings.Documents.ForEach(doc => product.MatchedListings.Add(new Listing(doc)));
+                matchedListings.Documents.ForEach(doc => {
+					Listings[doc.Id].Flag = "true";
+					product.MatchedListings.Add(new Listing(doc));
+                });
 			});
 			Console.WriteLine("Finished matching products : {0}s", sw.ElapsedMilliseconds / 1000f);
 
@@ -85,6 +93,9 @@ namespace StringPatternMatching {
 
 			// Print the results, need to convert this to a List due to issues with serializing a ConcurrentBag.
 			Helper.PrintJson(@"results.txt", new List<Result>(Results), Formatting.Indented);
+
+
+			Helper.PrintJson(@"rejects.txt", new List<Listing>(Listings.Values.Where(l => l.Flag == "false")), Formatting.None);
 
 			sw.Stop();
 			Console.WriteLine("Ding! Results complete : {0}s", sw.ElapsedMilliseconds / 1000f);

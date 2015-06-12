@@ -7,13 +7,13 @@ namespace StringPatternMatching {
 		public string title { get; set; }
 		public string currency { get; set; }
 		public string price { get; set; }
+		
+        public string Flag { get; set; }
 
-        [JsonIgnore]
-        public bool Flag { get; set; }
-
-        public Listing() { }
+        public Listing() { Flag = "false"; }
 
         public Listing(Listing listing) {
+			Flag = "false";
             manufacturer = listing.manufacturer;
             title = listing.title;
             currency = listing.currency;
