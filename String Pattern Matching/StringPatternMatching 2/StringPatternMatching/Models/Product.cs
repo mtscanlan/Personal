@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections.Generic;
 
 namespace StringPatternMatching {
 	public class Product {
@@ -13,6 +13,8 @@ namespace StringPatternMatching {
         public string FormattedManufacturer { get; set; }
         public string FormattedModel { get; set; }
         public string FormattedName { get; set; }
-		public ConcurrentBag<Listing> MatchedListings { get; set; }
+		public HashSet<CustomListing> MatchedListings { get; set; }
+
+		public Product() { }
 	}
 }

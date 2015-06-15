@@ -55,8 +55,6 @@
   <ItemGroup>
     <Compile Include="Helper\Helper.cs" />
     <Compile Include="Helper\ExtensionMethods.cs" />
-    <Compile Include="Helper\JaroWinklerComparer.cs" />
-    <Compile Include="Helper\UserDefinedFunctions.cs" />
     <Compile Include="Models\CustomListing.cs" />
     <Compile Include="Models\Listing.cs" />
     <Compile Include="Models\Product.cs" />

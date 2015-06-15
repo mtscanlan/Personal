@@ -25,35 +25,5 @@ namespace StringPatternMatching {
 			var text = ReadCharacters(path);
 			Parallel.ForEach(text.Result, parallelAction);
 		}
-
-        public static int SlidingStringDistance(string wordOne, string wordTwo, double threshold)
-        {
-            if (wordOne == null || wordTwo == null) return -1;
-
-            wordOne = wordOne.ToLower();
-            wordTwo = wordTwo.ToLower();
-
-            if (wordOne.Length == wordTwo.Length)
-            {
-                double stringDistance = UserDefinedFunctions.StringDistance(wordOne, wordTwo);
-                return stringDistance >= threshold ? 0 : -1;
-            }
-
-            Func<string, string, int> findMatchIndex = (shortWord, longWord) =>
-            {
-                bool foundCondition = false;
-                int index;
-                for (index = 0; index < longWord.Length - shortWord.Length; index++)
-                {
-                    double score = UserDefinedFunctions.StringDistance(shortWord, longWord.Substring(index, shortWord.Length));
-                    foundCondition = score >= threshold;
-                    if (foundCondition) break;
-                }
-                if (!foundCondition) index = -1;
-                return index;
-            };
-
-            return wordOne.Length > wordTwo.Length ? findMatchIndex(wordTwo, wordOne) : findMatchIndex(wordOne, wordTwo);
-        }
 	}
 }

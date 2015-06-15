@@ -2,18 +2,16 @@
 
 namespace StringPatternMatching {
 	public class Listing {
-
+		
+		public long id { get; set; }
 		public string manufacturer { get; set; }
 		public string title { get; set; }
 		public string currency { get; set; }
 		public string price { get; set; }
-		
-        public string Flag { get; set; }
 
-        public Listing() { Flag = "false"; }
+		public Listing() { }
 
         public Listing(Listing listing) {
-			Flag = "false";
             manufacturer = listing.manufacturer;
             title = listing.title;
             currency = listing.currency;
