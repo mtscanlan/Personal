@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GreatestCommonDivisor", "GreatestCommonDivisor\GreatestCommonDivisor.csproj", "{31A0EF5A-D8C7-44F0-B8B8-784950EF0C01}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{31A0EF5A-D8C7-44F0-B8B8-784950EF0C01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31A0EF5A-D8C7-44F0-B8B8-784950EF0C01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31A0EF5A-D8C7-44F0-B8B8-784950EF0C01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31A0EF5A-D8C7-44F0-B8B8-784950EF0C01}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
