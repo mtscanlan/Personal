@@ -2,8 +2,7 @@
 
 namespace StringPatternMatching {
 	public class Listing {
-		
-		public long id { get; set; }
+
 		public string manufacturer { get; set; }
 		public string title { get; set; }
 		public string currency { get; set; }

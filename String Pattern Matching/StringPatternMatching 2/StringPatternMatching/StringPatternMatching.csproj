@@ -55,7 +55,7 @@
   <ItemGroup>
     <Compile Include="Helper\Helper.cs" />
     <Compile Include="Helper\ExtensionMethods.cs" />
-    <Compile Include="Models\CustomListing.cs" />
+    <Compile Include="Models\IndexedListing.cs" />
     <Compile Include="Models\Listing.cs" />
     <Compile Include="Models\Product.cs" />
     <Compile Include="Program.cs" />
