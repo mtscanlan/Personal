@@ -44,22 +44,22 @@ namespace StringPatternMatching {
 			// Match listings to their respective products.
 			Parallel.ForEach(Products, product => {
 				product.MatchedListings = new ConcurrentBag<IndexedListing>();
+
 				Parallel.ForEach(Listings, listing => {
 					if (listing.FormattedManufacturer.Intersect(product.FormattedManufacturer).Count() == product.FormattedManufacturer.Count() &&
 						listing.FormattedTitle.Intersect(product.FormattedName).Count() == product.FormattedName.Count()) {
 						product.MatchedListings.Add(listing);
 					}
 				});
-
-				var x = new Result(product.product_name, product.MatchedListings.Distinct().Select(l => new Listing(l)));
-                Results.Add(x);
+				
+                Results.Add(new Result(product.product_name, product.MatchedListings.Distinct().Select(l => new Listing(l))));
 			});
 			Debug.WriteLine(String.Format("Matched {0} listings to {1} products.",
 				Results.Sum(r => r.listings.Count()), Results.Where(r => r.listings.Count() > 0).Count()));
 
 			// Print the results, need to convert this to a List due to issues with serializing a ConcurrentBag.
 			Helper.PrintJson(Helper.RESULTS_PATH, new List<Result>(Results), Formatting.None);
-			Debug.WriteLine(String.Format("Populated and saved Results to {0}", Helper.RESULTS_PATH));
+			Debug.WriteLine(String.Format("Populated and saved results to {0}", Helper.RESULTS_PATH));
 
 			Console.ReadKey();
 		}

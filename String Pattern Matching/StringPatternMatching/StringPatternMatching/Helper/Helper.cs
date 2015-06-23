@@ -10,10 +10,9 @@ namespace StringPatternMatching {
 		
 		public const string LISTINGS_PATH = @"listings.txt";
 		public const string PRODUCTS_PATH = @"products.txt";
-		public const string REGEX_REPLACE_PATTERN = "[^a-zA-Z\\d:]";
 		public const string RESULTS_PATH = @"results.txt";
 
-		public static readonly Regex RegexReplace = new Regex(REGEX_REPLACE_PATTERN);
+		public static readonly Regex RegexReplace = new Regex("[^a-zA-Z\\d:]");
 		public static readonly Regex Trimmer = new Regex(@"\s\s+");
 
 		public static void PrintJson(string path, IEnumerable<object> jsonObject, Formatting formatting) {
@@ -32,7 +31,7 @@ namespace StringPatternMatching {
 
 		public static void ReadFileAndPopulateData(string path, Action<string> parallelAction) {
 			var text = ReadCharacters(path);
-			text.Result.ForEach(parallelAction);
+			Parallel.ForEach(text.Result, parallelAction);
 		}
 	}
 }
