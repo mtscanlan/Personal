@@ -16,6 +16,7 @@ namespace FibonacciProduct
             F(n) * F(n+1) > prod.
         */
 
+        // Recursive
         private static Tuple<int, int, bool> FibProduct(int product, uint prev = 0, uint curr = 1) {
             uint currentProduct = prev * curr;
             return currentProduct < product ? 
@@ -23,6 +24,7 @@ namespace FibonacciProduct
                 Tuple.Create((int)prev, (int)curr, currentProduct == product);
         }
 
+        // Iterative
         private static Tuple<int, int, bool> FibProduct2(int product) {
             uint currentProd = 0, previous = 0, current = 1;
             while (currentProd < product) {
@@ -36,16 +38,6 @@ namespace FibonacciProduct
         }
 
         static void Main(string[] args) {
-            //Tuple<int, int, bool> result1 = FibProduct(104); // 8, 13, true
-            //Tuple<int, int, bool> result2 = FibProduct(103); // 8, 13, false
-            //Tuple<int, int, bool> result3 = FibProduct(Int32.MaxValue); // 46368, 75025, false
-            //Tuple<int, int, bool> result4 = FibProduct(Int32.MinValue); // 0, 1, false
-
-            //Console.WriteLine("{0}, {1}, {2}", result1.Item1, result1.Item2, result1.Item3);
-            //Console.WriteLine("{0}, {1}, {2}", result2.Item1, result2.Item2, result2.Item3);
-            //Console.WriteLine("{0}, {1}, {2}", result3.Item1, result3.Item2, result3.Item3);
-            //Console.WriteLine("{0}, {1}, {2}", result4.Item1, result4.Item2, result4.Item3);
-            
             int iterations = 1000000;
             for (int i = 0; i < 10; i++) { }
             Stopwatch s = new Stopwatch();
