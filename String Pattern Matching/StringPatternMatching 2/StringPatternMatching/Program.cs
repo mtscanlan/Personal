@@ -11,8 +11,7 @@ using Newtonsoft.Json;
 
 namespace StringPatternMatching {
 	public class Program {
-
-
+		
 		private static readonly ConcurrentBag<Product> Products = new ConcurrentBag<Product>();
 		private static readonly ConcurrentBag<Result> Results = new ConcurrentBag<Result>();
 
