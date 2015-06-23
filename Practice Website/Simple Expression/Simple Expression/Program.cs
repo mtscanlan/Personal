@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
 
 namespace Simple_Expression {
 	class Program {
@@ -60,19 +59,34 @@ namespace Simple_Expression {
 					Maths(c - '0');
 				}
 			}
-			Console.WriteLine(currentNode.Value.Value);
+			//Console.WriteLine(currentNode.Value.Value);
+		}
+
+		public static DataTable dt = new DataTable();
+		public static void compute_expression2(string expr) { // Given solution
+			var result = dt.Compute(expr, null);
 		}
 
 		static void Main(string[] args) {
-			//int iterations = 1000000;
-			//Stopwatch s = new Stopwatch();
-			//s.Start();
-			//for (int i = 0; i < iterations; i++) {
-			//	compute_expression("(2+2)-(3-(6-5))-4");
-			//}
-			//s.Stop();
-			//Console.WriteLine(s.ElapsedTicks);
-			compute_expression("(2+2)-(3-(6-5))-4");
+			int iterations = 1000000;
+			Stopwatch s = new Stopwatch();
+			s.Start();
+			for (int i = 0; i < iterations; i++) {
+				compute_expression("(2+2)-(3-(6-5))-4");
+			}
+			s.Stop();
+			Console.WriteLine(s.ElapsedTicks);
+
+			s.Reset();
+			s.Start();
+			for (int i = 0; i < iterations; i++) {
+				compute_expression2("(2+2)-(3-(6-5))-4");
+			}
+			s.Stop();
+			Console.WriteLine(s.ElapsedTicks);
+
+			//compute_expression("(2+2)-(3-(6-5))-4");
+			//compute_expression2("(2+2)-(3-(6-5))-4");
 			Console.ReadKey();
 		}
 	}
