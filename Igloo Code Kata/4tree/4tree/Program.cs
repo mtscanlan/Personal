@@ -41,6 +41,7 @@ namespace _4tree
             Debug.Assert(output.Equals(expected));
 
             //Done
+            Console.WriteLine("Done...");
             Console.ReadKey();
         }
 
@@ -50,19 +51,23 @@ namespace _4tree
             
             // Compare the values
             quadReturn.Value = quadOne.Value == quadTwo.Value ? quadOne.Value : -1;
-            
-            // Trickle down the if one tree has nodes and the other doesn't, stops when both quadOne and quadTwo have no children.
+
+            // Use the node parent depending on which do and do not have children. Recursively call Intersect on each node in the quadtree. 
             if (quadOne.HasChildren && !quadTwo.HasChildren)
             {
-                quadTwo = new QuadTree(new QuadTree(quadTwo.Value), new QuadTree(quadTwo.Value), new QuadTree(quadTwo.Value), new QuadTree(quadTwo.Value));
+                for (int i = 0; i < 4; i++)
+                {
+                    quadReturn.Nodes[i] = Intersect(quadOne.Nodes[i], quadTwo);
+                }
             }
             else if (quadTwo.HasChildren && !quadOne.HasChildren)
             {
-                quadOne = new QuadTree(new QuadTree(quadOne.Value), new QuadTree(quadOne.Value), new QuadTree(quadOne.Value), new QuadTree(quadOne.Value));
-            }
-
-            // if both have children, recursively call Intersect on each node in the quadtree.
-            if (quadOne.HasChildren && quadTwo.HasChildren)
+                for (int i = 0; i < 4; i++)
+                {
+                    quadReturn.Nodes[i] = Intersect(quadOne, quadTwo.Nodes[i]);
+                }
+            } 
+            else if (quadOne.HasChildren && quadTwo.HasChildren)
             {
                 for (int i = 0; i < 4; i++)
                 {
