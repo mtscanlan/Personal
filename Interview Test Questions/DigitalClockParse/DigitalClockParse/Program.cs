@@ -8,46 +8,61 @@ using System.Threading.Tasks;
 namespace DigitalClockParse {
 	class Program {
 
-        public static List<string> numbers = new List<string>() {
+        public static List<string> numbersAsLines = new List<string>() {
 				" _ | ||_|", // 0
-				"", // 1
-				"", // 2
-				"", // 3
-				"", // 4
-				"", // 5
+				"     |  |", // 1
+				" _  _||_ ", // 2
+				" _  _| _|", // 3
+				"   |_|  |", // 4
+				" _ |_  _|", // 5
 				" _ |_ |_|", // 6
-				"", // 7
+				" _   |  |", // 7
 				" _ |_||_|", // 8
-				"" // 9
+				" _ |_| _|"  // 9
 			};
 
-        public static void get_time(string path)
+        private static void DisplayResults(string[] numbers)
+        {
+            foreach (string number in numbers)
+            {
+                Console.Write(numbersAsLines.IndexOf(number));
+            }
+        }
+
+        private static string[] Parse(string[] lines, int lineLength)
+        {
+            string[] numbersInFile = new string[lineLength / 3]; // Each number is 3 chars wide.
+
+            foreach (string line in lines)
+            {
+                for (int i = 0; i < lineLength; i++)
+                {
+                    string value = line[i].ToString();
+                    numbersInFile[i / 3] += value; // ie, (0-2)/3 = 0, (3-5)/3 = 1...etc
+                }
+            }
+
+            return numbersInFile;
+        }
+
+        public static void GetTime(string path)
         {
             string[] lines = File.ReadAllLines(path);
+
             if (lines.Length == 3)
             {
-                int lineLength = lines[0].Length;
-                string[] numbersInFile = new string[lineLength / 3];
-
-                foreach (string line in lines)
-                {
-                    for (int i = 0; i < lineLength; i++)
-                    {
-                        string value = line.ToArray()[i].ToString();
-                        numbersInFile[i / 3] += value;
-                    }
-                }
-
-                foreach (string number in numbersInFile)
-                {
-                    Console.Write(numbers.IndexOf(number));
-                }
+                string[] numbers = Parse(lines, lines[0].Length);
+                DisplayResults(numbers);
+            }
+            else
+            {
+                Console.WriteLine("Incorrect format");
             }
         }
 
 		static void Main(string[] args) 
         {
-            get_time(@"time.txt"); // 860
+            GetTime(@"time.txt"); // 860
             Console.ReadKey();
 		}
 	}
