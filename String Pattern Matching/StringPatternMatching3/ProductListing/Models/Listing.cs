@@ -7,9 +7,9 @@ namespace ProductListing.Models
     public class Listing
     {
         [JsonIgnore]
-        internal string _title;
+        public string FormattedTitle;
         [JsonIgnore]
-        internal string[] _titleWords;
+        public string[] FormattedTitleWords;
 
         [JsonProperty("manufacturer")]
         public string Manufacturer { get; set; }
@@ -38,9 +38,9 @@ namespace ProductListing.Models
         [OnDeserialized]
         private void OnDeserializingMethod(StreamingContext context)
         {
-            _title = Title == null ? string.Empty : RegexHelper.RegexReplace.Replace(Title, " ").ToLower();
-            _title = RegexHelper.RegexTrimmer.Replace(_title, " ");
-            _titleWords = _title.Split(' ');
+            FormattedTitle = Title == null ? string.Empty : RegexHelper.RegexReplace.Replace(Title, " ").ToLower();
+            FormattedTitle = RegexHelper.RegexTrimmer.Replace(FormattedTitle, " ");
+            FormattedTitleWords = FormattedTitle.Split(' ');
         }
 
         public override string ToString()

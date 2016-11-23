@@ -6,10 +6,10 @@ namespace ProductListing.Models
 {
     public class Product
     {
-        internal string _family;
-        internal string[] _familyWords;
-        internal string _model;
-        internal string[] _modelWords;
+        public string FormattedFamily { get; private set; }
+        public string[] FormattedFamilyWords { get; private set; }
+        public string FormattedModel { get; private set; }
+        public string[] FormattedModelWords { get; private set; }
 
         [JsonProperty("family")]
         public string Family { get; set; } = string.Empty;
@@ -37,10 +37,11 @@ namespace ProductListing.Models
         [OnDeserialized]
         private void OnDeserializingMethod(StreamingContext context)
         {
-            _family = Family == null ? string.Empty : RegexHelper.RegexReplace.Replace(Family, " ").ToLower();
-            _familyWords = _family.Split(' ');
-            _model = Model == null ? string.Empty : RegexHelper.RegexReplace.Replace(Model, " ").ToLower();
-            _modelWords = _model.Split(' ');
+            FormattedFamily = Family == null ? string.Empty : RegexHelper.RegexReplace.Replace(Family, " ").ToLower();
+            FormattedFamilyWords = FormattedFamily.Split(' ');
+
+            FormattedModel = Model == null ? string.Empty : RegexHelper.RegexReplace.Replace(Model, " ").ToLower();
+            FormattedModelWords = FormattedModel.Split(' ');
         }
     }
 }
