@@ -5,16 +5,19 @@
     <Setting Name="IndexName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">camera_listings</Value>
     </Setting>
-    <Setting Name="IndexUri" Type="System.String" Scope="User">
+    <Setting Name="IndexUri" Type="System.String" Scope="Application">
       <Value Profile="(Default)">http://localhost:9200</Value>
     </Setting>
-    <Setting Name="ListingsFileName" Type="System.String" Scope="User">
+    <Setting Name="ManufacturersFileName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">manufacturers.txt</Value>
+    </Setting>
+    <Setting Name="ListingsFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">listings.txt</Value>
     </Setting>
-    <Setting Name="ProductsFileName" Type="System.String" Scope="User">
+    <Setting Name="ProductsFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">products.txt</Value>
     </Setting>
-    <Setting Name="ResultsFileName" Type="System.String" Scope="User">
+    <Setting Name="ResultsFileName" Type="System.String" Scope="Application">
       <Value Profile="(Default)">results.txt</Value>
     </Setting>
   </Settings>

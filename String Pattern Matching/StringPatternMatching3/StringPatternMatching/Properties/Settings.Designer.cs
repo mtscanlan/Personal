@@ -32,51 +32,48 @@ namespace StringPatternMatching.Properties {
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("http://localhost:9200")]
         public string IndexUri {
             get {
                 return ((string)(this["IndexUri"]));
             }
-            set {
-                this["IndexUri"] = value;
+        }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("manufacturers.txt")]
+        public string ManufacturersFileName {
+            get {
+                return ((string)(this["ManufacturersFileName"]));
             }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("listings.txt")]
         public string ListingsFileName {
             get {
                 return ((string)(this["ListingsFileName"]));
             }
-            set {
-                this["ListingsFileName"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("products.txt")]
         public string ProductsFileName {
             get {
                 return ((string)(this["ProductsFileName"]));
             }
-            set {
-                this["ProductsFileName"] = value;
-            }
         }
         
-        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("results.txt")]
         public string ResultsFileName {
             get {
                 return ((string)(this["ResultsFileName"]));
-            }
-            set {
-                this["ResultsFileName"] = value;
             }
         }
     }
