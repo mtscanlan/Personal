@@ -16,7 +16,7 @@ namespace StringPatternMatching
     {
         private static ConcurrentBag<Product> _products = new ConcurrentBag<Product>();
         private static ConcurrentBag<Listing> _listings = new ConcurrentBag<Listing>();
-        private static Dictionary<string, ConcurrentBag<Listing>> _results = new Dictionary<string, ConcurrentBag<Listing>>();
+        private static ConcurrentBag<Result> _results = new ConcurrentBag<Result>();
 
         private static void Main(string[] args)
         {
@@ -53,36 +53,21 @@ namespace StringPatternMatching
             // 3.) Match products to listings by iterating over each listing for each product and populate a collection of 
             // Listing's using the MatchProductToListing(this Product, Listing, IDictionary<string, int>) method.
             Trace.WriteLine("Matching listings to products.");
-            _results = _products.ToDictionary(k => k.ProductName, v => new ConcurrentBag<Listing>());
-            foreach(var listing in _listings)
+            Parallel.ForEach(_products, product => 
             {
-                var matchedProducts = new ConcurrentBag<Product>();
+                var matchedListings = new ConcurrentBag<Listing>();
 
-                Parallel.ForEach(_products, product => 
-                {
+                Parallel.ForEach(_listings, listing => {
                     if (product.MatchProductToListing(listing, manufacturerFilter))
                     {
-                        matchedProducts.Add(product);
+                        matchedListings.Add(listing);
                     }
                 });
 
-                if (matchedProducts.Count == 0) { /*Do Nothing*/ }
-                else if (matchedProducts.Count == 1)
-                {
-                    Product tempProduct = matchedProducts.First();
-                    _results[tempProduct.ProductName].Add(listing);
-                }
-                else
-                {
-                    if (!listing.FormattedTitleWords.Intersect(new string[] { "for", "pour", "für" }).Any())
-                    {
-                        var x = matchedProducts.OrderByDescending(ob => ob.FormattedModelWords.Count()).First();
-                        ;
-                    }
-                }
-            }
-            Trace.WriteLine($"Matched {_results.Sum(r => r.Value.Count())} "
-                + $"listings to {_results.Where(r => r.Value.Count() > 0).Count()} products.");
+                _results.Add(new Result(product.ProductName, matchedListings.Distinct()));
+            });
+            Trace.WriteLine($"Matched {_results.Sum(r => r.listings.Count())} "
+                + $"listings to {_results.Where(r => r.listings.Count() > 0).Count()} products.");
 
 
             // ********************************************************** REMOVE
@@ -91,7 +76,7 @@ namespace StringPatternMatching
 
 
             // 4.) Print the results, need to convert this to a List due to issues with serializing a ConcurrentBag.
-            FileOutput.PrintJson(Settings.Default.ResultsFileName, _results.ToDictionary(kv => kv.Key, kv => kv.Value as IEnumerable<Listing>));
+            FileOutput.PrintJson(Settings.Default.ResultsFileName, new List<Result>(_results));
 
             // 5.) Done
             Console.WriteLine("Complete, press any key to exit...");

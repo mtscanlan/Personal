@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Result.cs" />
     <Compile Include="Utilities\FileInput.cs" />
     <Compile Include="Utilities\FileOutput.cs" />
     <Compile Include="Models\Listing.cs" />

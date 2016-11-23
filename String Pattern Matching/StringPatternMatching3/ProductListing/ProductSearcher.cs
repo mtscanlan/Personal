@@ -20,6 +20,7 @@ namespace ProductListing
             return listing.IsMatched = 
                 productManufacturerKey == listingManufacturerKey && // match manufacturer
                 listing.FormattedTitle.Contains(product.FormattedModel) && // match exact model in title
+                !listing.FormattedTitleWords.Intersect(new string[] { "for", "pour", "für" }).Any() &&
                 listing.FormattedTitleWords.Intersect(product.FormattedFamilyWords).Any() && // match any words from family in title
                 listing.FormattedTitleWords.Intersect(product.FormattedModelWords).Count() == product.FormattedModelWords.Count(); // match all words from model in title
         }

@@ -8,12 +8,12 @@ namespace ProductListing.Utilities
 {
     public class FileOutput
     {
-        public static void PrintJson(string path, Dictionary<string, IEnumerable<Listing>> productListings)
+        public static void PrintJson(string path, IEnumerable<Result> results)
         {
             Trace.WriteLine($"Writing to file \"{path}\"");
             using (TextWriter writer = new StreamWriter(path))
             {
-                foreach (var obj in productListings)
+                foreach (var obj in results)
                 {
                     writer.WriteLine(JsonConvert.SerializeObject(obj, Formatting.Indented));
                 }
