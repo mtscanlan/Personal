@@ -25,33 +25,35 @@ namespace FizzBuzz
             your function is expected to print the result in less than 2 seconds
          */
 
-        public static void fizzbuzz(int n)
+        public static string FizzBuzz(int n)
         {
-            for (int i = 1; i <= n; i++)
-            {
-                if (i % 3 == 0 && i % 5 != 0)
-                {
-                    Console.WriteLine("Fizz");
-                }
-                else if (i % 3 != 0 && i % 5 == 0)
-                {
-                    Console.WriteLine("Buzz");
-                }
-                else if (i % 3 == 0 && i % 5 == 0)
-                {
-                    Console.WriteLine("FizzBuzz");
-                }
-                else
-                {
-                    Console.WriteLine(i);
-                }
-            }
+            string value = n.ToString();
 
+            if (n % 15 == 0)
+                value = "FizzBuzz";
+            else if (n % 3 == 0)
+                value = "Fizz";
+            else if (n % 5 == 0)
+                value = "Buzz";
+
+            return value;
+        }
+
+        private static void DisplayFizzBuzz(int v, bool reverse)
+        {
+            var iteration = (reverse ?
+                Enumerable.Range(1, v).Select(FizzBuzz).Reverse() :
+                Enumerable.Range(1, v).Select(FizzBuzz));
+
+            foreach (var value in iteration)
+            {
+                Console.WriteLine(value);
+            }
         }
 
         static void Main(string[] args)
         {
-            fizzbuzz(15); // fizz fizz buzz buzz oh what a relief it is.
+            DisplayFizzBuzz(105, reverse: false);
             Console.ReadKey();
         }
     }

@@ -1,0 +1,40 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+.header-background {
+    fill-opacity:0.2;
+}
+div.background {
+    background: url(http://www.snazzyspace.com/wallpapers/ba6b15_buttered-toast.png) repeat;
+    border: 2px solid black;
+}
+
+div.transbox {
+    margin: 30px;
+    background-color: #654321;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    opacity: 0.8;
+    filter: alpha(opacity=60); /* For IE8 and earlier */
+}
+
+div.transbox p {
+    margin: 5%;
+    font-weight: bold;
+    color: #ffffff;
+}
