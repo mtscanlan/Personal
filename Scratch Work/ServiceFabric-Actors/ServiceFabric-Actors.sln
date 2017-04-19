@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "ServiceFabric_Actors", "ServiceFabric-Actors\ServiceFabric_Actors.sfproj", "{2BBF697A-B271-41B2-9A96-65610C7DA57A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Actor1", "Actor1\Actor1.csproj", "{19F0D55A-A1E6-4B55-9F86-557445C18E9D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stateful1", "Stateful1\Stateful1.csproj", "{9F40B2A1-50EE-42FF-B39C-366AD04AB342}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BBF697A-B271-41B2-9A96-65610C7DA57A}.Debug|x64.ActiveCfg = Debug|x64
+		{2BBF697A-B271-41B2-9A96-65610C7DA57A}.Debug|x64.Build.0 = Debug|x64
+		{2BBF697A-B271-41B2-9A96-65610C7DA57A}.Debug|x64.Deploy.0 = Debug|x64
+		{2BBF697A-B271-41B2-9A96-65610C7DA57A}.Release|x64.ActiveCfg = Release|x64
+		{2BBF697A-B271-41B2-9A96-65610C7DA57A}.Release|x64.Build.0 = Release|x64
+		{2BBF697A-B271-41B2-9A96-65610C7DA57A}.Release|x64.Deploy.0 = Release|x64
+		{19F0D55A-A1E6-4B55-9F86-557445C18E9D}.Debug|x64.ActiveCfg = Debug|x64
+		{19F0D55A-A1E6-4B55-9F86-557445C18E9D}.Debug|x64.Build.0 = Debug|x64
+		{19F0D55A-A1E6-4B55-9F86-557445C18E9D}.Release|x64.ActiveCfg = Release|x64
+		{19F0D55A-A1E6-4B55-9F86-557445C18E9D}.Release|x64.Build.0 = Release|x64
+		{9F40B2A1-50EE-42FF-B39C-366AD04AB342}.Debug|x64.ActiveCfg = Debug|x64
+		{9F40B2A1-50EE-42FF-B39C-366AD04AB342}.Debug|x64.Build.0 = Debug|x64
+		{9F40B2A1-50EE-42FF-B39C-366AD04AB342}.Release|x64.ActiveCfg = Release|x64
+		{9F40B2A1-50EE-42FF-B39C-366AD04AB342}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
