@@ -1,0 +1,1 @@
+## [Introduction to Service Fabric (Lab) – Part 1](https://blogs.msdn.microsoft.com/azureservicefabric/2016/07/06/introduction-to-service-fabric-lab-part-1/)
