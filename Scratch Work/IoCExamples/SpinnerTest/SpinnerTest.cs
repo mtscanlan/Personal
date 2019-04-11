@@ -32,7 +32,7 @@ namespace SpinnerTest
 
         [Theory]
         [InlineData("Hello, World!", "Profile1")] // Profile 1 should print "Hello, World!
-        [InlineData("Hello, World!", "Profile2")] // Profile 1 should print "Hello, World!
+        [InlineData("Hello, World!", "Profile2")] // Profile 2 should print "Hello, World!
         public void SpinnerBuilderGetSpinnerService_IWorldGreeter_CorrectGreetingBehaviour(
             string greeting,
             string profileName)
