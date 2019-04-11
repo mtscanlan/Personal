@@ -9,7 +9,7 @@ namespace SpinnerService.Contracts
         {
             return new Container(c =>
             {
-                // Register WorldGreeter as implementation to IWorldGreeter interface
+                // Register default implementations to their interface
                 c.For<IWorldGreeter>().Singleton().Use(new WorldGreeter());
                 c.For<ISpinner>().Singleton().Use(new DefaultSpinner());
 
